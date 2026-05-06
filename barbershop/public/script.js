@@ -29,6 +29,9 @@ function inicializarPagina() {
     // Gerar carrosel de serviços
     gerarCarrosselServicos();
 
+    // Definir serviço inicial no input hidden para envio
+    document.getElementById('servico').value = SERVICOS[servicoIndex].id;
+
     // Event listeners
     document.getElementById('form-agendamento').addEventListener('submit', criarAgendamento);
 
@@ -184,6 +187,8 @@ async function carregarHorariosData() {
         }
     } catch (erro) {
         console.error('Erro ao carregar horários:', erro);
+        document.getElementById('horarios-grid').innerHTML =
+            '<div style="grid-column: 1/-1; text-align: center; color: #999; padding: 10px;">Erro ao carregar horários. Verifique se o servidor está rodando.</div>';
     }
 }
 
@@ -214,7 +219,7 @@ function renderizarHorarios(horarios) {
     let html = '';
     horariosFiltrados.forEach(horario => {
         html += `
-            <button type="button" class="horario-btn" onclick="selecionarHorario('${horario}')">
+            <button type="button" class="horario-btn" onclick="selecionarHorario(event, '${horario}')">
                 ${horario}
             </button>
         `;
@@ -234,7 +239,7 @@ function ehHoje(dataStr) {
 }
 
 // Selecionar horário
-function selecionarHorario(horario) {
+function selecionarHorario(event, horario) {
     const slot = dadosCarrossel[carrosselIndex];
     
     // Atualizar valor do input hidden
