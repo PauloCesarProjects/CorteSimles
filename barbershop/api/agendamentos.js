@@ -1,4 +1,4 @@
-const { supabase } = require('./lib/supabase');
+const { addAgendamento, getAgendamentosByWhatsapp, isHorarioOcupado } = require('./lib/store');
 
 module.exports = async (req, res) => {
   // Configurar CORS
@@ -10,11 +10,6 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
-  }
-
-  // Verificar se Supabase está configurado
-  if (!supabase) {
-    return res.status(500).json({ erro: 'Banco de dados não configurado. Verifique as variáveis de ambiente SUPABASE_URL e SUPABASE_KEY.' });
   }
 
   try {
@@ -54,37 +49,19 @@ module.exports = async (req, res) => {
       }
 
       // Verificar se o horário já está ocupado
-      const { data: ocupado } = await supabase
-        .from('agendamentos')
-        .select('id')
-        .eq('data_agendamento', data)
-        .eq('hora_inicio', hora)
-        .eq('servico', servico)
-        .limit(1);
-
-      if (ocupado && ocupado.length > 0) {
+      if (isHorarioOcupado(data, hora, servico)) {
         return res.status(400).json({ erro: 'Este horário já está ocupado' });
       }
 
       // Inserir agendamento
-      const { data: novoAgendamento, error } = await supabase
-        .from('agendamentos')
-        .insert([
-          {
-            data_agendamento: data,
-            hora_inicio: hora,
-            servico,
-            nome_cliente: nome,
-            whatsapp: whatsapp.replace(/\D/g, ''),
-            criado_em: new Date().toISOString()
-          }
-        ])
-        .select();
-
-      if (error) {
-        console.error('Erro ao criar agendamento:', error);
-        return res.status(500).json({ erro: 'Erro ao criar agendamento' });
-      }
+      const novoAgendamento = addAgendamento({
+        data_agendamento: data,
+        hora_inicio: hora,
+        servico,
+        nome_cliente: nome,
+        whatsapp: whatsapp.replace(/\D/g, ''),
+        criado_em: new Date().toISOString()
+      });
 
       const mensagensServico = {
         'corte': 'Corte de Cabelo',
@@ -100,7 +77,7 @@ module.exports = async (req, res) => {
 
       return res.status(200).json({
         sucesso: true,
-        id: novoAgendamento[0].id,
+        id: novoAgendamento.id,
         mensagem: 'Agendamento realizado com sucesso!',
         linkWhatsapp: linkWhatsapp,
         whatsappRaw: whatsapp.replace(/\D/g, '')
@@ -115,17 +92,7 @@ module.exports = async (req, res) => {
       }
 
       const whatsappLimpo = whatsapp.replace(/\D/g, '');
-      const { data: agendamentos, error } = await supabase
-        .from('agendamentos')
-        .select('*')
-        .eq('whatsapp', whatsappLimpo)
-        .order('data_agendamento', { ascending: false })
-        .order('hora_inicio', { ascending: false });
-
-      if (error) {
-        console.error('Erro ao buscar agendamentos:', error);
-        return res.status(500).json({ erro: 'Erro ao buscar agendamentos' });
-      }
+      const agendamentos = getAgendamentosByWhatsapp(whatsappLimpo);
 
       return res.status(200).json({ agendamentos });
 

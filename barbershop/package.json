@@ -9,7 +9,6 @@
     "vercel-build": "echo 'No build step required for Vercel'"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.38.4",
     "sqlite3": "^6.0.1"
   },
   "devDependencies": {

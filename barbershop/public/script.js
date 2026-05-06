@@ -307,15 +307,19 @@ function formatarWhatsapp(evento) {
     }
 }
 
-// Gerar horários (9h - 22h, 30 em 30 minutos)
+// Gerar horários (13:30 - 19:30, 30 em 30 minutos)
 function gerarHorarios() {
     const horarios = [];
-    const inicio = 9;
-    const fim = 22;
+    const inicio = 13;
+    const fim = 20;
     
     for (let hora = inicio; hora < fim; hora++) {
-        horarios.push(`${hora.toString().padStart(2, '0')}:00`);
-        horarios.push(`${hora.toString().padStart(2, '0')}:30`);
+        if (hora === 13) {
+            horarios.push('13:30');
+        } else {
+            horarios.push(`${hora.toString().padStart(2, '0')}:00`);
+            horarios.push(`${hora.toString().padStart(2, '0')}:30`);
+        }
     }
     
     return horarios;

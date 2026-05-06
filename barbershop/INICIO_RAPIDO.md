@@ -42,7 +42,7 @@ http://localhost:3000
 
 - ✅ **Agendar Horários**: Escolha data, horário e serviço
 - ✅ **Escolher Serviço**: Corte, Barba ou Corte + Barba
-- ✅ **Ver Horários Livres**: Automaticamente calcula o que está disponível (9h-20h)
+- ✅ **Ver Horários Livres**: Automaticamente calcula o que está disponível (13:30-19:30)
 - ✅ **Confirmar via WhatsApp**: Manda uma mensagem automática
 - ✅ **Ver Meus Agendamentos**: Consulte seus agendamentos pelo WhatsApp
 - ✅ **Cancelar Agendamento**: Cancele agendamentos futuros

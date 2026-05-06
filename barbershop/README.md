@@ -5,7 +5,7 @@ Um sistema completo de agendamento online para barbearias, desenvolvido com HTML
 ## ✨ Características
 
 - ✂️ **Agendamento Online**: Interface intuitiva para marcar horários
-- 📅 **Gerenciamento de Datas**: Horários disponíveis de 9h a 20h (intervalos de 30 minutos)
+- 📅 **Gerenciamento de Datas**: Horários disponíveis de 13:30 a 19:30 (intervalos de 30 minutos)
 - 💬 **Integração WhatsApp**: Envio automático de confirmação via WhatsApp
 - 📱 **Responsivo**: Design adaptado para desktop e mobile
 - 🗄️ **Banco de Dados**: SQLite para persistência de dados

@@ -1,4 +1,4 @@
-const { supabase } = require('./lib/supabase');
+const { agendamentos } = require('./lib/store');
 
 module.exports = async (req, res) => {
   // Configurar CORS
@@ -16,11 +16,6 @@ module.exports = async (req, res) => {
     return res.status(405).json({ erro: 'Método não permitido' });
   }
 
-  // Verificar se Supabase está configurado
-  if (!supabase) {
-    return res.status(500).json({ erro: 'Banco de dados não configurado. Verifique as variáveis de ambiente SUPABASE_URL e SUPABASE_KEY.' });
-  }
-
   try {
     const { data, servico } = req.body;
 
@@ -31,49 +26,33 @@ module.exports = async (req, res) => {
     // Gerar todos os horários possíveis
     const horariosDisponiveis = gerarHorarios();
 
-    // Se Supabase não está configurado, retornar todos os horários
-    if (!supabase) {
-      console.warn('Supabase não configurado, retornando todos os horários');
-      return res.status(200).json({ horarios: horariosDisponiveis });
-    }
+    // Buscar agendamentos já marcados para a data
+    const horariosOcupados = agendamentos
+      .filter(a => a.data_agendamento === data && a.servico === servico)
+      .map(a => a.hora_inicio);
 
-    try {
-      // Buscar agendamentos já marcados para a data
-      const { data: agendamentos, error } = await supabase
-        .from('agendamentos')
-        .select('hora_inicio')
-        .eq('data_agendamento', data)
-        .eq('servico', servico);
+    const horarios = horariosDisponiveis.filter(h => !horariosOcupados.includes(h));
 
-      if (error) {
-        console.warn('Erro ao buscar agendamentos, retornando todos os horários:', error);
-        return res.status(200).json({ horarios: horariosDisponiveis });
-      }
-
-      const horariosOcupados = agendamentos.map(a => a.hora_inicio);
-      const horarios = horariosDisponiveis.filter(h => !horariosOcupados.includes(h));
-
-      res.status(200).json({ horarios });
-    } catch (erroSupabase) {
-      console.error('Erro ao conectar ao Supabase:', erroSupabase);
-      // Em caso de erro, retornar todos os horários disponíveis
-      res.status(200).json({ horarios: horariosDisponiveis });
-    }
+    res.status(200).json({ horarios });
   } catch (erro) {
     console.error('Erro geral:', erro);
     res.status(500).json({ erro: 'Erro interno do servidor' });
   }
 };
 
-// Gerar horários (9h - 22h, 30 em 30 minutos)
+// Gerar horários (13:30 - 19:30, 30 em 30 minutos)
 function gerarHorarios() {
   const horarios = [];
-  const inicio = 9;
-  const fim = 22;
+  const inicio = 13;
+  const fim = 20;
   
   for (let hora = inicio; hora < fim; hora++) {
-    horarios.push(`${hora.toString().padStart(2, '0')}:00`);
-    horarios.push(`${hora.toString().padStart(2, '0')}:30`);
+    if (hora === 13) {
+      horarios.push('13:30');
+    } else {
+      horarios.push(`${hora.toString().padStart(2, '0')}:00`);
+      horarios.push(`${hora.toString().padStart(2, '0')}:30`);
+    }
   }
   
   return horarios;

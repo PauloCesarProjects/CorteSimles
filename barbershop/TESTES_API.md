@@ -133,6 +133,6 @@ curl -X DELETE http://localhost:3000/api/agendamentos/1
 - ✓ Nome deve ter pelo menos 3 caracteres
 - ✓ WhatsApp deve ter 10-11 dígitos
 - ✓ Data não pode ser no passado
-- ✓ Horário deve estar entre 9h e 20h
+- ✓ Horário deve estar entre 13:30 e 19:30
 - ✓ Horário já ocupado será rejeitado
 - ✓ Serviço deve ser válido (corte, barba, corte-barba)
