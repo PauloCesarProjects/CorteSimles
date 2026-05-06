@@ -1,14 +1,14 @@
 {
   "version": 2,
   "functions": {
-    "barbershop/api/**/*.js": {
+    "api/*.js": {
       "runtime": "@vercel/node@2.0.0"
     }
   },
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/barbershop/api/$1"
+      "dest": "/api/$1"
     },
     {
       "src": "/",
