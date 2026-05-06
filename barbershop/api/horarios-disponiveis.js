@@ -52,3 +52,17 @@ module.exports = async (req, res) => {
     res.status(500).json({ erro: 'Erro interno do servidor' });
   }
 };
+
+// Gerar horários (9h - 22h, 30 em 30 minutos)
+function gerarHorarios() {
+  const horarios = [];
+  const inicio = 9;
+  const fim = 22;
+  
+  for (let hora = inicio; hora < fim; hora++) {
+    horarios.push(`${hora.toString().padStart(2, '0')}:00`);
+    horarios.push(`${hora.toString().padStart(2, '0')}:30`);
+  }
+  
+  return horarios;
+}
