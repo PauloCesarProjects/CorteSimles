@@ -31,24 +31,36 @@ module.exports = async (req, res) => {
     // Gerar todos os horários possíveis
     const horariosDisponiveis = gerarHorarios();
 
-    // Buscar agendamentos já marcados para a data
-    const { data: agendamentos, error } = await supabase
-      .from('agendamentos')
-      .select('hora_inicio')
-      .eq('data_agendamento', data)
-      .eq('servico', servico);
-
-    if (error) {
-      console.error('Erro ao buscar agendamentos:', error);
-      return res.status(500).json({ erro: 'Erro ao buscar horários' });
+    // Se Supabase não está configurado, retornar todos os horários
+    if (!supabase) {
+      console.warn('Supabase não configurado, retornando todos os horários');
+      return res.status(200).json({ horarios: horariosDisponiveis });
     }
 
-    const horariosOcupados = agendamentos.map(a => a.hora_inicio);
-    const horarios = horariosDisponiveis.filter(h => !horariosOcupados.includes(h));
+    try {
+      // Buscar agendamentos já marcados para a data
+      const { data: agendamentos, error } = await supabase
+        .from('agendamentos')
+        .select('hora_inicio')
+        .eq('data_agendamento', data)
+        .eq('servico', servico);
 
-    res.status(200).json({ horarios });
+      if (error) {
+        console.warn('Erro ao buscar agendamentos, retornando todos os horários:', error);
+        return res.status(200).json({ horarios: horariosDisponiveis });
+      }
+
+      const horariosOcupados = agendamentos.map(a => a.hora_inicio);
+      const horarios = horariosDisponiveis.filter(h => !horariosOcupados.includes(h));
+
+      res.status(200).json({ horarios });
+    } catch (erroSupabase) {
+      console.error('Erro ao conectar ao Supabase:', erroSupabase);
+      // Em caso de erro, retornar todos os horários disponíveis
+      res.status(200).json({ horarios: horariosDisponiveis });
+    }
   } catch (erro) {
-    console.error('Erro:', erro);
+    console.error('Erro geral:', erro);
     res.status(500).json({ erro: 'Erro interno do servidor' });
   }
 };
