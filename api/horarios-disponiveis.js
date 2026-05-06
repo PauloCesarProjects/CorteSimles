@@ -60,7 +60,7 @@ module.exports = async (req, res) => {
   }
 };
 
-// Gerar horários (9h - 22h, 30 em 30 minutos)
+// Gerar horários (9h - 22h, 30 em 30 minutos) - VERSÃO 2025
 function gerarHorarios() {
   const horarios = [];
   const inicio = 9;
