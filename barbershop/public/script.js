@@ -570,6 +570,8 @@ async function cancelarAgendamento(id) {
             const whatsapp = document.getElementById('whatsapp-busca').value.replace(/\D/g, '');
             setTimeout(() => {
                 buscarAgendamentos();
+                // Atualizar horários disponíveis após cancelamento
+                carregarHorariosData();
             }, 1000);
         } else {
             mostrarMensagemBusca('Erro ao cancelar agendamento: ' + dados.erro, 'erro');
