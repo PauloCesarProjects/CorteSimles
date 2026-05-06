@@ -1,0 +1,5 @@
+barbershop/node_modules
+barbershop/barbershop.db
+barbershop/.git
+**/*.log
+**/*.md
