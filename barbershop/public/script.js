@@ -3,13 +3,14 @@
 const API_BASE = '/api';
 
 // Número da barbearia para receber mensagens
-const WHATSAPP_BARBEARIA = '33998399419';
+const WHATSAPP_BARBEARIA = '33998034195';
 
 // Dados de serviços
 const SERVICOS = [
-    { id: 'corte', nome: 'Corte de Cabelo', preco: 'R$ 40,00' },
-    { id: 'barba', nome: 'Barba', preco: 'R$ 30,00' },
-    { id: 'corte-barba', nome: 'Corte e Barba', preco: 'R$ 65,00' }
+    { id: 'corte', nome: 'Corte de Cabelo', preco: 'R$ 20,00' },
+    { id: 'sobrancelha', nome: 'Sobrancelha', preco: 'R$ 5,00' },
+    { id: 'corte-sobrancelha', nome: 'Corte + Sobrancelha', preco: 'R$ 25,00' },
+    { id: 'corte-pigmentacao', nome: 'Corte + Pigmentação', preco: 'R$ 35,00' }
 ];
 
 // Índices dos carrosseis
@@ -589,8 +590,9 @@ function mostrarMensagemBusca(texto, tipo) {
 function obterNomeServico(servico) {
     const nomes = {
         'corte': 'Corte de Cabelo',
-        'barba': 'Barba',
-        'corte-barba': 'Corte e Barba'
+        'sobrancelha': 'Sobrancelha',
+        'corte-sobrancelha': 'Corte + Sobrancelha',
+        'corte-pigmentacao': 'Corte + Pigmentação'
     };
     return nomes[servico] || servico;
 }

@@ -88,8 +88,9 @@ module.exports = async (req, res) => {
 
       const mensagensServico = {
         'corte': 'Corte de Cabelo',
-        'barba': 'Barba',
-        'corte-barba': 'Corte e Barba'
+        'sobrancelha': 'Sobrancelha',
+        'corte-sobrancelha': 'Corte + Sobrancelha',
+        'corte-pigmentacao': 'Corte + Pigmentação'
       };
 
       const nomeServico = mensagensServico[servico] || servico;

@@ -156,8 +156,9 @@ app.post('/api/agendamentos', (req, res) => {
       // Gerar mensagem WhatsApp
       const mensagensServico = {
         'corte': 'Corte de Cabelo',
-        'barba': 'Barba',
-        'corte-barba': 'Corte e Barba'
+        'sobrancelha': 'Sobrancelha',
+        'corte-sobrancelha': 'Corte + Sobrancelha',
+        'corte-pigmentacao': 'Corte + Pigmentação'
       };
 
       const nomeServico = mensagensServico[servico] || servico;
