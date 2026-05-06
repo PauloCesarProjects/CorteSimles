@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barbearia - Sistema de Agendamento</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <h1>Barbearia hemerick</h1>
+                <p>Agende seu horário online</p>
+            </div>
+        </header>
+
+        <main>
+            <!-- Seção de Agendamento -->
+            <section id="secao-agendamento" class="ativa">
+                <div class="card-agendamento">
+                    <h2>Novo Agendamento</h2>
+                    
+                    <form id="form-agendamento">
+                        <!-- Informações Pessoais -->
+                        <div class="form-group">
+                            <label for="nome">Nome Completo</label>
+                            <input type="text" id="nome" name="nome" required placeholder="Seu nome">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="whatsapp">WhatsApp</label>
+                            <input type="tel" id="whatsapp" name="whatsapp" required placeholder="(11) 99999-9999" maxlength="15">
+                            <small>Será usado para confirmar seu agendamento</small>
+                        </div>
+
+                        <!-- Tipo de Serviço - Carrossel -->
+                        <div class="form-group">
+                            <label>Tipo de Serviço</label>
+                            <small>Deslize para escolher o serviço</small>
+                            
+                            <div class="carrossel-container servico-container">
+                                <button type="button" class="carrossel-btn carrossel-prev" onclick="deslizarServicos(-1)">❮</button>
+                                
+                                <div class="carrossel-wrapper">
+                                    <div class="carrossel" id="carrossel-servicos">
+                                        <!-- Preenchido dinamicamente -->
+                                    </div>
+                                </div>
+                                
+                                <button type="button" class="carrossel-btn carrossel-next" onclick="deslizarServicos(1)">❯</button>
+                            </div>
+
+                            <div id="servico-selecionado-display" class="servico-selecionado-display"></div>
+                            <input type="hidden" id="servico" name="servico">
+                        </div>
+
+                        <!-- Carrossel de Data e Horário -->
+                        <div class="form-group">
+                            <label>Selecione Data e Horário</label>
+                            <small>Deslize para escolher a data e depois o horário</small>
+                            
+                            <!-- Data Selecionada -->
+                            <div id="data-selecionada-display" class="data-selecionada-display">
+                                Sábado, 12/5
+                            </div>
+                            
+                            <!-- Carrossel de Datas -->
+                            <div class="carrossel-container">
+                                <button type="button" class="carrossel-btn carrossel-prev" onclick="deslizarCarrossel(-1)">❮</button>
+                                
+                                <div class="carrossel-wrapper">
+                                    <div class="carrossel" id="carrossel-slots">
+                                        <!-- Preenchido dinamicamente -->
+                                    </div>
+                                </div>
+                                
+                                <button type="button" class="carrossel-btn carrossel-next" onclick="deslizarCarrossel(1)">❯</button>
+                            </div>
+
+                            <!-- Horários Disponíveis -->
+                            <div class="horarios-secao">
+                                <label style="margin-top: 15px; margin-bottom: 10px;">Horários Disponíveis</label>
+                                <div class="horarios-grid" id="horarios-grid">
+                                    <!-- Preenchido dinamicamente -->
+                                </div>
+                            </div>
+
+                            <!-- Info Slot Selecionado -->
+                            <div id="slot-selecionado" class="slot-info"></div>
+                            <input type="hidden" id="data" name="data">
+                            <input type="hidden" id="hora" name="hora">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Agendar</button>
+                    </form>
+
+                    <div id="mensagem" class="mensagem"></div>
+                </div>
+
+                <!-- Botão para ver agendamentos -->
+                <div class="card-acoes">
+                    <button class="btn btn-secondary" onclick="mostrarMeusAgendamentos()">
+                        📅 Ver Meus Agendamentos
+                    </button>
+                </div>
+            </section>
+
+            <!-- Seção de Agendamentos do Cliente -->
+            <section id="secao-meus-agendamentos" class="oculta">
+                <div class="card-agendamento">
+                    <h2>Meus Agendamentos</h2>
+                    
+                    <div class="form-group">
+                        <label for="whatsapp-busca">WhatsApp para consultar</label>
+                        <div class="busca-container">
+                            <input type="tel" id="whatsapp-busca" placeholder="(11) 99999-9999" maxlength="15">
+                            <button class="btn btn-secondary" onclick="buscarAgendamentos()">Buscar</button>
+                        </div>
+                    </div>
+
+                    <div id="lista-agendamentos"></div>
+                </div>
+
+                <div class="card-acoes">
+                    <button class="btn btn-secondary" onclick="voltarParaAgendamento()">
+                        ← Voltar para Agendamento
+                    </button>
+                </div>
+            </section>
+
+            <!-- Modal WhatsApp da Barbearia -->
+            <div id="modal-whatsapp" class="modal-whatsapp">
+                <div class="modal-content">
+                    <span class="modal-close" onclick="fecharModalWhatsapp()">&times;</span>
+                    <h3>Confirmar Agendamento</h3>
+                    <p id="modal-mensagem"></p>
+                    <p style="margin-top: 15px; font-weight: bold;">Clique no botão abaixo para enviar a confirmação à barbearia:</p>
+                    <div class="modal-botoes">
+                        <a id="link-whatsapp-barbearia" href="#" target="_blank" class="btn btn-primary">
+                            💬 Enviar via WhatsApp
+                        </a>
+                        <button class="btn btn-secondary" onclick="fecharModalWhatsapp()">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 Barbearia Premium - Sistema de Agendamento Online</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

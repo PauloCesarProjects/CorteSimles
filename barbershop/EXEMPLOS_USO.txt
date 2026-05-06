@@ -1,0 +1,259 @@
+📋 EXEMPLOS DE USO - Sistema de Agendamento de Barbearia
+========================================================
+
+
+CENÁRIO 1: Cliente Marca um Horário
+====================================
+
+👤 Cliente: Maria Silva
+📱 WhatsApp: (21) 98765-4321
+✂️ Serviço: Corte de Cabelo
+📅 Data: 10/05/2024
+🕐 Horário: 14:30
+
+
+PASSO 1: Acesso
+→ Cliente acessa: http://localhost:3000
+
+PASSO 2: Preenchimento
+→ Nome: Maria Silva
+→ WhatsApp: (21) 98765-4321
+→ Tipo de Serviço: Corte de Cabelo - R$ 40,00
+→ Data: 10 de maio de 2024
+→ Horário: 14:30 (sistema automaticamente carrega apenas horários disponíveis)
+
+PASSO 3: Confirmação
+→ Cliente clica em "Agendar"
+→ Sistema valida:
+   ✓ Dados completos? SIM
+   ✓ WhatsApp válido? SIM
+   ✓ Horário disponível? SIM
+→ Agendamento confirmado!
+
+PASSO 4: Confirmação WhatsApp
+→ Cliente recebe mensagem:
+  "Clique aqui para confirmar via WhatsApp"
+→ Link automático para enviar:
+  "Olá Maria! Seu agendamento foi confirmado:
+   📅 Data: Sexta, 10 de maio de 2024
+   🕐 Horário: 14:30
+   ✂️ Serviço: Corte de Cabelo
+   Até breve!"
+
+✅ RESULTADO: Agendamento criado e confirmado!
+
+
+CENÁRIO 2: Cliente Consulta seus Agendamentos
+==============================================
+
+👤 Cliente: João Santos
+📱 WhatsApp: (11) 97654-3210
+
+
+PASSO 1: Acesso
+→ Cliente clica em "📅 Ver Meus Agendamentos"
+
+PASSO 2: Busca
+→ Insere seu WhatsApp: (11) 97654-3210
+→ Clica em "Buscar"
+
+PASSO 3: Resultado
+Sistema exibe:
+┌─────────────────────────────────────┐
+│ ✂️ Corte de Cabelo                   │
+│ 📅 Data: Quinta, 9 de maio de 2024  │
+│ 🕐 Horário: 10:00                   │
+│ 👤 Nome: João Santos                │
+│ ID: #123                            │
+│ [✕ Cancelar]                        │
+└─────────────────────────────────────┘
+
+┌─────────────────────────────────────┐
+│ 💈 Corte e Barba                     │
+│ 📅 Data: Terça, 7 de maio de 2024   │
+│ 🕐 Horário: 15:30                   │
+│ 👤 Nome: João Santos                │
+│ ID: #120                            │
+│ [Agendamento passado]               │
+└─────────────────────────────────────┘
+
+✅ RESULTADO: Cliente vê todos seus agendamentos
+
+
+CENÁRIO 3: Cliente Cancela um Agendamento
+==========================================
+
+👤 Cliente: Maria Silva
+📱 WhatsApp: (21) 98765-4321
+❌ Cancelar: Agendamento #125
+
+
+PASSO 1: Acesso
+→ Cliente vai para "Ver Meus Agendamentos"
+→ Insere WhatsApp: (21) 98765-4321
+→ Clica em "Buscar"
+
+PASSO 2: Cancelamento
+→ Encontra agendamento #125
+→ Clica em "✕ Cancelar"
+→ Sistema pede confirmação: "Tem certeza?"
+→ Cliente confirma: "Sim"
+
+PASSO 3: Resultado
+✓ Agendamento cancelado com sucesso!
+  A data e horário ficam novamente disponíveis
+
+✅ RESULTADO: Agendamento removido do sistema
+
+
+CENÁRIO 4: Sistema Automaticamente Gerencia Horários
+=====================================================
+
+Horários de funcionamento: 9h às 20h (30 em 30 minutos)
+
+EXEMPLO DE HORÁRIOS DISPONÍVEIS:
+09:00 ✓
+09:30 ✓
+10:00 ✓
+10:30 ✗ (ocupado)
+11:00 ✓
+11:30 ✗ (ocupado)
+12:00 ✓
+12:30 ✓
+13:00 ✓
+13:30 ✗ (ocupado)
+14:00 ✓
+14:30 ✓
+15:00 ✗ (ocupado)
+15:30 ✓
+... até 20:00
+
+⚙️ O sistema:
+1. Gera automaticamente todos os horários (9h-20h)
+2. Busca no banco de dados quais estão ocupados
+3. Mostra apenas os disponíveis no select
+4. Impede agendamento em horários ocupados
+
+
+CENÁRIO 5: Banco de Dados
+===========================
+
+Dados armazenados após os agendamentos acima:
+
+┌─ AGENDAMENTOS ──────────────────────────────────────────────┐
+│ ID │ Data       │ Hora  │ Serviço     │ Nome            │   │
+├────┼────────────┼───────┼─────────────┼─────────────────┼───┤
+│ 1  │ 2024-05-10 │ 14:30 │ corte       │ Maria Silva     │   │
+│ 2  │ 2024-05-10 │ 14:00 │ corte-barba │ João Santos     │   │
+│ 3  │ 2024-05-09 │ 10:00 │ barba       │ Pedro Costa     │   │
+│ 4  │ 2024-05-09 │ 13:30 │ corte       │ Ana Oliveira    │   │
+│ ... mais agendamentos ...                                 │   │
+└─ WhatsApp armazenado para cada cliente ─────────────────────┘
+
+✓ Dados persistem mesmo depois de desligar o servidor
+
+
+CENÁRIO 6: Validações de Segurança
+===================================
+
+O sistema REJEITA:
+
+❌ Nome vazio
+   Mensagem: "Por favor, preencha todos os campos"
+
+❌ WhatsApp inválido (ex: 123)
+   Mensagem: "Número de WhatsApp inválido"
+
+❌ Data no passado
+   Mensagem: "Não é possível agendar para datas passadas"
+
+❌ Tentar agendar horário ocupado
+   Mensagem: "Este horário já está ocupado"
+
+❌ Tentar agendar fora do horário de funcionamento
+   Apenas mostra horários entre 9h-20h
+
+✓ RESULTADO: Sistema robusto e seguro
+
+
+CENÁRIO 7: Acesso Multiplataforma
+==================================
+
+DESKTOP (PC):
+→ http://localhost:3000
+✓ Interface completa com todos os elementos
+
+TABLET:
+→ http://seu-ip:3000 (ex: 192.168.1.100:3000)
+✓ Design adaptado para tela média
+
+SMARTPHONE:
+→ http://seu-ip:3000
+✓ Design mobile-first, totalmente responsivo
+
+✓ RESULTADO: Funciona em qualquer dispositivo
+
+
+CENÁRIO 8: Relatório de Agendamentos (Futuro)
+==============================================
+
+Com acesso ao banco de dados, você pode gerar relatórios:
+
+Agendamentos por dia:
+SELECT COUNT(*) FROM agendamentos WHERE data_agendamento = '2024-05-10';
+→ Resultado: 5 agendamentos
+
+Agendamentos por serviço:
+SELECT servico, COUNT(*) FROM agendamentos GROUP BY servico;
+→ Corte: 12
+→ Barba: 8
+→ Corte e Barba: 15
+
+Receita estimada:
+SELECT 
+  SUM(CASE WHEN servico='corte' THEN 40
+           WHEN servico='barba' THEN 30
+           WHEN servico='corte-barba' THEN 65 END) as receita
+FROM agendamentos;
+→ Receita: R$ 1.210,00
+
+
+MENSAGENS DE RESPOSTA DO SISTEMA
+==================================
+
+SUCESSO:
+✓ Agendamento realizado com sucesso!
+✓ Agendamento cancelado com sucesso
+
+ERRO:
+✗ Todos os campos são obrigatórios
+✗ Nome deve ter pelo menos 3 caracteres
+✗ Número de WhatsApp inválido
+✗ Não é possível agendar para datas passadas
+✗ Este horário já está ocupado
+✗ Agendamento não encontrado
+
+INFORMAÇÃO:
+i Será usado para confirmar seu agendamento
+i Horários disponíveis: 9h às 20h (intervalos de 30 minutos)
+i Nenhum agendamento encontrado para este número
+
+
+🎯 FLUXO COMPLETO DE USO
+========================
+
+1. Cliente acessa http://localhost:3000
+2. Preenchimento: nome, WhatsApp, serviço, data, hora
+3. Validação automática de disponibilidade
+4. Confirmação do agendamento
+5. Link automático para WhatsApp
+6. Dados salvos no banco de dados
+7. Cliente recebe confirmação no WhatsApp
+8. Cliente pode consultar agendamentos a qualquer hora
+9. Cliente pode cancelar agendamentos futuros
+10. Agendamento removido do banco de dados
+
+
+✨ PRONTO PARA USO! ✨
+
+Seu sistema está 100% funcional e pronto para ser utilizado!

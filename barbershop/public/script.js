@@ -1,0 +1,601 @@
+// API base URL
+// Use o caminho relativo /api para funcionar no Vercel e no Vercel dev local.
+const API_BASE = '/api';
+
+// Número da barbearia para receber mensagens
+const WHATSAPP_BARBEARIA = '33998399419';
+
+// Dados de serviços
+const SERVICOS = [
+    { id: 'corte', nome: 'Corte de Cabelo', preco: 'R$ 40,00' },
+    { id: 'barba', nome: 'Barba', preco: 'R$ 30,00' },
+    { id: 'corte-barba', nome: 'Corte e Barba', preco: 'R$ 65,00' }
+];
+
+// Índices dos carrosseis
+let carrosselIndex = 0;
+let servicoIndex = 0;
+
+// Dados do carrossel
+let dadosCarrossel = [];
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarPagina();
+});
+
+// Inicializar página
+function inicializarPagina() {
+    // Gerar carrosel de serviços
+    gerarCarrosselServicos();
+
+    // Event listeners
+    document.getElementById('form-agendamento').addEventListener('submit', criarAgendamento);
+
+    // Formatar WhatsApp conforme digita
+    document.getElementById('whatsapp').addEventListener('input', formatarWhatsapp);
+    document.getElementById('whatsapp-busca').addEventListener('input', formatarWhatsapp);
+
+    // Fechar modal ao clicar fora
+    document.getElementById('modal-whatsapp').addEventListener('click', (e) => {
+        if (e.target.id === 'modal-whatsapp') {
+            fecharModalWhatsapp();
+        }
+    });
+}
+
+// Gerar carrosel de serviços
+function gerarCarrosselServicos() {
+    const container = document.getElementById('carrossel-servicos');
+    let html = '';
+
+    SERVICOS.forEach((servico, index) => {
+        const selecionado = index === servicoIndex ? 'selecionado' : '';
+        html += `
+            <div class="servico-card ${selecionado}" onclick="selecionarServico(${index})">
+                <div class="servico-nome">${servico.nome}</div>
+                <div class="servico-preco">${servico.preco}</div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+    atualizarServicoDisplay();
+}
+
+// Selecionar serviço
+function selecionarServico(index) {
+    servicoIndex = index;
+    const servico = SERVICOS[index];
+    document.getElementById('servico').value = servico.id;
+    gerarCarrosselServicos();
+    gerarSlotsCarrossel();
+}
+
+// Deslizar carrosel de serviços
+function deslizarServicos(direcao) {
+    const novoIndex = servicoIndex + direcao;
+    
+    if (novoIndex >= 0 && novoIndex < SERVICOS.length) {
+        selecionarServico(novoIndex);
+        
+        // Scroll automático
+        const carrossel = document.getElementById('carrossel-servicos');
+        const card = carrossel.children[novoIndex];
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+}
+
+// Atualizar display do serviço selecionado
+function atualizarServicoDisplay() {
+    const servico = SERVICOS[servicoIndex];
+    const display = document.getElementById('servico-selecionado-display');
+    display.textContent = `✓ ${servico.nome} - ${servico.preco}`;
+}
+
+// Gerar slots do carrossel
+async function gerarSlotsCarrossel() {
+    const servico = SERVICOS[servicoIndex].id;
+
+    // Gerar próximas 14 dias
+    const slots = [];
+    const hoje = new Date();
+    
+    for (let i = 0; i < 14; i++) {
+        const data = new Date(hoje);
+        data.setDate(data.getDate() + i);
+        
+        const dataStr = data.toISOString().split('T')[0];
+        
+        slots.push({
+            data: dataStr,
+            dataFormatada: formatarDataCarrossel(data),
+            diaSemana: obterDiaSemana(data),
+        });
+    }
+
+    dadosCarrossel = slots;
+    carrosselIndex = 0;
+    renderizarCarrossel();
+    await carregarHorariosData();
+}
+
+// Renderizar carrossel
+function renderizarCarrossel() {
+    const container = document.getElementById('carrossel-slots');
+    let html = '';
+
+    dadosCarrossel.forEach((slot, index) => {
+        const selecionado = index === carrosselIndex ? 'selecionado' : '';
+        const dataComDia = `${slot.diaSemana} ${slot.dataFormatada}`;
+        html += `
+            <div class="slot ${selecionado}" onclick="selecionarSlot(${index})">
+                <div class="slot-data">${dataComDia}</div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+    atualizarDataDisplay();
+}
+
+// Selecionar slot
+function selecionarSlot(index) {
+    carrosselIndex = index;
+    renderizarCarrossel();
+}
+
+// Atualizar display da data selecionada
+async function atualizarDataDisplay() {
+    if (dadosCarrossel.length === 0) return;
+    
+    const slot = dadosCarrossel[carrosselIndex];
+    const dataDisplay = document.getElementById('data-selecionada-display');
+    dataDisplay.textContent = `${slot.diaSemana}, ${slot.dataFormatada}`;
+    
+    document.getElementById('data').value = slot.data;
+    document.getElementById('hora').value = '';
+    
+    // Carregar horários para essa data
+    await carregarHorariosData();
+}
+
+// Carregar horários disponíveis para a data selecionada
+async function carregarHorariosData() {
+    const slot = dadosCarrossel[carrosselIndex];
+    const servico = SERVICOS[servicoIndex].id;
+    
+    if (!slot || !servico) return;
+
+    try {
+        const resposta = await fetch(`${API_BASE}/horarios-disponiveis`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data: slot.data, servico })
+        });
+
+        const dados = await resposta.json();
+        
+        if (resposta.ok) {
+            renderizarHorarios(dados.horarios);
+        } else {
+            document.getElementById('horarios-grid').innerHTML = 
+                '<div style="grid-column: 1/-1; text-align: center; color: #999; padding: 10px;">Nenhum horário disponível</div>';
+        }
+    } catch (erro) {
+        console.error('Erro ao carregar horários:', erro);
+    }
+}
+
+// Renderizar horários disponíveis
+function renderizarHorarios(horarios) {
+    const grid = document.getElementById('horarios-grid');
+    const slot = dadosCarrossel[carrosselIndex];
+    
+    // Filtrar horários que já passaram se for hoje
+    let horariosFiltrados = horarios;
+    
+    if (slot && ehHoje(slot.data)) {
+        const agora = new Date();
+        const minutoAtual = agora.getHours() * 60 + agora.getMinutes();
+        
+        horariosFiltrados = horarios.filter(horario => {
+            const [hora, minuto] = horario.split(':').map(Number);
+            const minutoHorario = hora * 60 + minuto;
+            return minutoHorario > minutoAtual;
+        });
+    }
+    
+    if (horariosFiltrados.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #999; padding: 10px;">Nenhum horário disponível</div>';
+        return;
+    }
+    
+    let html = '';
+    horariosFiltrados.forEach(horario => {
+        html += `
+            <button type="button" class="horario-btn" onclick="selecionarHorario('${horario}')">
+                ${horario}
+            </button>
+        `;
+    });
+    
+    grid.innerHTML = html;
+}
+
+// Verificar se a data é hoje
+function ehHoje(dataStr) {
+    const hoje = new Date();
+    const dataParaComparar = new Date(dataStr + 'T00:00:00');
+    
+    return hoje.getFullYear() === dataParaComparar.getFullYear() &&
+           hoje.getMonth() === dataParaComparar.getMonth() &&
+           hoje.getDate() === dataParaComparar.getDate();
+}
+
+// Selecionar horário
+function selecionarHorario(horario) {
+    const slot = dadosCarrossel[carrosselIndex];
+    
+    // Atualizar valor do input hidden
+    document.getElementById('hora').value = horario;
+    document.getElementById('data').value = slot.data;
+    
+    // Atualizar visual do botão
+    const botoes = document.querySelectorAll('.horario-btn');
+    botoes.forEach(btn => {
+        btn.classList.remove('selecionado');
+    });
+    event.target.classList.add('selecionado');
+    
+    // Atualizar info de slot selecionado
+    const infoDiv = document.getElementById('slot-selecionado');
+    infoDiv.innerHTML = `✓ ${slot.diaSemana}, ${slot.dataFormatada} às ${horario}`;
+    infoDiv.classList.add('selecionado');
+}
+
+// Deslizar carrossel
+function deslizarCarrossel(direcao) {
+    const novoIndex = carrosselIndex + direcao;
+    
+    if (novoIndex >= 0 && novoIndex < dadosCarrossel.length) {
+        carrosselIndex = novoIndex;
+        renderizarCarrossel();
+        
+        // Scroll automático
+        const carrossel = document.getElementById('carrossel-slots');
+        const slot = carrossel.children[novoIndex];
+        slot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+}
+
+// Formatar data para carrossel
+function formatarDataCarrossel(data) {
+    const dia = data.getDate();
+    const mes = data.getMonth() + 1;
+    return `${dia}/${mes}`;
+}
+
+// Obter dia da semana (completo)
+function obterDiaSemana(data) {
+    const dias = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+    return dias[data.getDay()];
+}
+
+// Formatar WhatsApp
+function formatarWhatsapp(evento) {
+    let valor = evento.target.value.replace(/\D/g, '');
+    
+    if (valor.length > 11) {
+        valor = valor.slice(0, 11);
+    }
+    
+    if (valor.length === 0) {
+        evento.target.value = '';
+    } else if (valor.length <= 2) {
+        evento.target.value = `(${valor}`;
+    } else if (valor.length <= 7) {
+        evento.target.value = `(${valor.slice(0, 2)}) ${valor.slice(2)}`;
+    } else {
+        evento.target.value = `(${valor.slice(0, 2)}) ${valor.slice(2, 7)}-${valor.slice(7)}`;
+    }
+}
+
+// Gerar horários (9h - 22h, 30 em 30 minutos)
+function gerarHorarios() {
+    const horarios = [];
+    const inicio = 9;
+    const fim = 22;
+    
+    for (let hora = inicio; hora < fim; hora++) {
+        horarios.push(`${hora.toString().padStart(2, '0')}:00`);
+        horarios.push(`${hora.toString().padStart(2, '0')}:30`);
+    }
+    
+    return horarios;
+}
+
+// Criar agendamento
+async function criarAgendamento(evento) {
+    evento.preventDefault();
+
+    const nome = document.getElementById('nome').value.trim();
+    const whatsapp = document.getElementById('whatsapp').value.replace(/\D/g, '');
+    const servico = SERVICOS[servicoIndex].id;
+    const data = document.getElementById('data').value;
+    const hora = document.getElementById('hora').value;
+
+    // Validações
+    if (!nome || !whatsapp || !data || !hora) {
+        mostrarMensagem('Por favor, preencha todos os campos', 'erro');
+        return;
+    }
+
+    if (nome.length < 3) {
+        mostrarMensagem('Nome deve ter pelo menos 3 caracteres', 'erro');
+        return;
+    }
+
+    if (whatsapp.length < 10) {
+        mostrarMensagem('Número de WhatsApp inválido', 'erro');
+        return;
+    }
+
+    try {
+        const botao = document.querySelector('#form-agendamento button[type="submit"]');
+        botao.disabled = true;
+        botao.innerHTML = '<span class="spinner"></span> Agendando...';
+
+        const resposta = await fetch(`${API_BASE}/agendamentos`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                nome,
+                whatsapp,
+                servico,
+                data,
+                hora
+            })
+        });
+
+        const dados = await resposta.json();
+
+        if (resposta.ok) {
+            mostrarModalConfirmacao(dados, nome, servico, data, hora, whatsapp);
+            limparFormulario();
+        } else {
+            mostrarMensagem('Erro: ' + dados.erro, 'erro');
+        }
+
+        botao.disabled = false;
+        botao.innerHTML = 'Agendar';
+    } catch (erro) {
+        console.error('Erro:', erro);
+        mostrarMensagem('Erro ao conectar com o servidor', 'erro');
+        const botao = document.querySelector('#form-agendamento button[type="submit"]');
+        botao.disabled = false;
+        botao.innerHTML = 'Agendar';
+    }
+}
+
+// Mostrar modal de confirmação
+function mostrarModalConfirmacao(dados, nome, servico, data, hora, whatsapp) {
+    const servicoNome = obterNomeServico(servico);
+    
+    // Encontrar o slot selecionado para pegar as informações formatadas
+    const slot = dadosCarrossel.find(s => s.data === data);
+    const dataFormatadaModal = slot ? `${slot.diaSemana}, ${slot.dataFormatada}` : formatarDataCompleta(data);
+    
+    // Mensagem para a barbearia
+    const mensagem = `Novo Agendamento!\n\n👤 Cliente: ${nome}\n📱 WhatsApp: +55${whatsapp}\n✂️ Serviço: ${servicoNome}\n📅 Data: ${dataFormatadaModal}\n🕐 Horário: ${hora}\n\nID do Agendamento: #${dados.id}`;
+    
+    const linkWhatsapp = `https://wa.me/55${WHATSAPP_BARBEARIA}?text=${encodeURIComponent(mensagem)}`;
+    
+    document.getElementById('modal-mensagem').innerHTML = `
+        <strong>${nome}</strong>, seu agendamento foi criado com sucesso!<br><br>
+        Confirme os dados:<br>
+        <strong>${servicoNome}</strong><br>
+        📅 ${dataFormatadaModal}<br>
+        🕐 ${hora}
+    `;
+    
+    document.getElementById('link-whatsapp-barbearia').href = linkWhatsapp;
+    
+    const modal = document.getElementById('modal-whatsapp');
+    modal.classList.add('ativa');
+}
+
+// Fechar modal WhatsApp
+function fecharModalWhatsapp() {
+    const modal = document.getElementById('modal-whatsapp');
+    modal.classList.remove('ativa');
+}
+
+// Limpar formulário
+function limparFormulario() {
+    document.getElementById('form-agendamento').reset();
+    document.getElementById('slot-selecionado').innerHTML = '';
+    document.getElementById('slot-selecionado').classList.remove('selecionado');
+    
+    // Limpar seleção de horário
+    document.querySelectorAll('.horario-btn').forEach(btn => {
+        btn.classList.remove('selecionado');
+    });
+    
+    gerarCarrosselServicos();
+    gerarSlotsCarrossel();
+}
+
+// Mostrar mensagem
+function mostrarMensagem(texto, tipo) {
+    const mensagemDiv = document.getElementById('mensagem');
+    mensagemDiv.textContent = texto;
+    mensagemDiv.className = `mensagem ${tipo}`;
+    
+    if (tipo === 'erro') {
+        setTimeout(() => {
+            mensagemDiv.className = '';
+            mensagemDiv.textContent = '';
+        }, 5000);
+    }
+}
+
+// Mostrar meus agendamentos
+function mostrarMeusAgendamentos() {
+    document.getElementById('secao-agendamento').classList.remove('ativa');
+    document.getElementById('secao-agendamento').classList.add('oculta');
+    document.getElementById('secao-meus-agendamentos').classList.remove('oculta');
+    document.getElementById('secao-meus-agendamentos').classList.add('ativa');
+    document.getElementById('lista-agendamentos').innerHTML = '';
+}
+
+// Voltar para agendamento
+function voltarParaAgendamento() {
+    document.getElementById('secao-meus-agendamentos').classList.remove('ativa');
+    document.getElementById('secao-meus-agendamentos').classList.add('oculta');
+    document.getElementById('secao-agendamento').classList.remove('oculta');
+    document.getElementById('secao-agendamento').classList.add('ativa');
+    document.getElementById('whatsapp-busca').value = '';
+    document.getElementById('lista-agendamentos').innerHTML = '';
+}
+
+// Buscar agendamentos
+async function buscarAgendamentos() {
+    const whatsapp = document.getElementById('whatsapp-busca').value.replace(/\D/g, '');
+
+    if (whatsapp.length < 10) {
+        mostrarMensagemBusca('Por favor, digite um número de WhatsApp válido', 'erro');
+        return;
+    }
+
+    try {
+        const botao = event.target;
+        botao.disabled = true;
+        botao.innerHTML = '<span class="spinner"></span>';
+
+        const resposta = await fetch(`${API_BASE}/agendamentos?whatsapp=${whatsapp}`);
+        const dados = await resposta.json();
+
+        if (resposta.ok) {
+            exibirAgendamentos(dados.agendamentos);
+        } else {
+            mostrarMensagemBusca('Erro ao buscar agendamentos', 'erro');
+        }
+
+        botao.disabled = false;
+        botao.innerHTML = 'Buscar';
+    } catch (erro) {
+        console.error('Erro:', erro);
+        mostrarMensagemBusca('Erro ao conectar com o servidor', 'erro');
+    }
+}
+
+// Exibir agendamentos
+function exibirAgendamentos(agendamentos) {
+    const listaDiv = document.getElementById('lista-agendamentos');
+
+    if (agendamentos.length === 0) {
+        listaDiv.innerHTML = `
+            <div class="vazio">
+                <p>Nenhum agendamento encontrado para este número.</p>
+                <small>Verifique se o número de WhatsApp está correto.</small>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '<div class="agendamentos-lista">';
+
+    agendamentos.forEach(agendamento => {
+        const dataFormatada = formatarDataCompleta(agendamento.data_agendamento);
+        const servicoNome = obterNomeServico(agendamento.servico);
+        const dataAgendamento = new Date(agendamento.data_agendamento);
+        const dataAtual = new Date();
+        dataAtual.setHours(0, 0, 0, 0);
+        const podeCancelar = dataAgendamento >= dataAtual;
+
+        html += `
+            <div class="agendamento-item">
+                <div class="agendamento-info">
+                    <h3>✂️ ${servicoNome}</h3>
+                    <p><strong>📅 Data:</strong> ${dataFormatada}</p>
+                    <p><strong>🕐 Horário:</strong> ${agendamento.hora_inicio}</p>
+                    <p><strong>👤 Nome:</strong> ${agendamento.nome_cliente}</p>
+                    <p><strong>ID:</strong> #${agendamento.id}</p>
+                </div>
+                <div class="agendamento-acoes">
+                    ${podeCancelar ? `
+                        <button class="btn btn-danger" onclick="cancelarAgendamento(${agendamento.id})">
+                            ✕ Cancelar
+                        </button>
+                    ` : `
+                        <span style="color: #999; font-size: 0.9em;">Agendamento passado</span>
+                    `}
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    listaDiv.innerHTML = html;
+}
+
+// Cancelar agendamento
+async function cancelarAgendamento(id) {
+    if (!confirm('Tem certeza que deseja cancelar este agendamento?')) {
+        return;
+    }
+
+    try {
+        const resposta = await fetch(`${API_BASE}/cancelar-agendamento?id=${id}`, {
+            method: 'DELETE'
+        });
+
+        const dados = await resposta.json();
+
+        if (resposta.ok) {
+            mostrarMensagemBusca('Agendamento cancelado com sucesso', 'sucesso');
+            const whatsapp = document.getElementById('whatsapp-busca').value.replace(/\D/g, '');
+            setTimeout(() => {
+                buscarAgendamentos();
+            }, 1000);
+        } else {
+            mostrarMensagemBusca('Erro ao cancelar agendamento: ' + dados.erro, 'erro');
+        }
+    } catch (erro) {
+        console.error('Erro:', erro);
+        mostrarMensagemBusca('Erro ao conectar com o servidor', 'erro');
+    }
+}
+
+// Mostrar mensagem na busca
+function mostrarMensagemBusca(texto, tipo) {
+    const listaDiv = document.getElementById('lista-agendamentos');
+    const mensagem = document.createElement('div');
+    mensagem.className = `mensagem ${tipo}`;
+    mensagem.textContent = texto;
+    listaDiv.innerHTML = '';
+    listaDiv.appendChild(mensagem);
+}
+
+// Obter nome do serviço
+function obterNomeServico(servico) {
+    const nomes = {
+        'corte': 'Corte de Cabelo',
+        'barba': 'Barba',
+        'corte-barba': 'Corte e Barba'
+    };
+    return nomes[servico] || servico;
+}
+
+// Formatar data completa
+function formatarDataCompleta(dataString) {
+    const data = new Date(dataString + 'T00:00:00');
+    const opcoes = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return data.toLocaleDateString('pt-BR', opcoes)
+        .split(' ')
+        .map((palavra, index) => index === 0 ? palavra.charAt(0).toUpperCase() + palavra.slice(1) : palavra)
+        .join(' ');
+}

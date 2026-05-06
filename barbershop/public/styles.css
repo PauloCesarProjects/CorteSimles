@@ -1,0 +1,1107 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --cor-primaria: #1a1a1a;
+    --cor-secundaria: #d4af37;
+    --cor-fundo: #f5f5f5;
+    --cor-texto: #333;
+    --cor-border: #ddd;
+    --cor-erro: #e74c3c;
+    --cor-sucesso: #27ae60;
+    --sombra: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
+header {
+    background: linear-gradient(135deg, var(--cor-primaria), #2c2c2c);
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    box-shadow: var(--sombra);
+}
+
+.logo h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    color: var(--cor-secundaria);
+}
+
+.logo p {
+    font-size: 1.1em;
+    opacity: 0.9;
+}
+
+/* Main */
+main {
+    min-height: 500px;
+}
+
+section {
+    transition: opacity 0.3s ease;
+}
+
+section.oculta {
+    display: none;
+}
+
+section.ativa {
+    display: block;
+}
+
+/* Cards */
+.card-agendamento,
+.card-acoes {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: var(--sombra);
+    margin-bottom: 20px;
+}
+
+.card-agendamento h2,
+.card-acoes h2 {
+    color: var(--cor-primaria);
+    margin-bottom: 25px;
+    border-bottom: 3px solid var(--cor-secundaria);
+    padding-bottom: 15px;
+}
+
+/* Formulário */
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--cor-primaria);
+}
+
+input,
+select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--cor-border);
+    border-radius: 6px;
+    font-size: 1em;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: var(--cor-secundaria);
+    box-shadow: 0 0 5px rgba(212, 175, 55, 0.3);
+}
+
+input:disabled,
+select:disabled {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+}
+
+small {
+    display: block;
+    margin-top: 6px;
+    color: #666;
+    font-size: 0.9em;
+}
+
+/* Botões */
+.btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    text-align: center;
+}
+
+.btn-primary {
+    background-color: var(--cor-secundaria);
+    color: var(--cor-primaria);
+}
+
+.btn-primary:hover {
+    background-color: #c9a227;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(212, 175, 55, 0.3);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background-color: var(--cor-primaria);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #3a3a3a;
+    transform: translateY(-2px);
+    box-shadow: var(--sombra);
+}
+
+.btn-danger {
+    background-color: var(--cor-erro);
+    color: white;
+    padding: 8px 16px;
+    width: auto;
+    font-size: 0.9em;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+/* Mensagens */
+.mensagem {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 6px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.mensagem.erro {
+    display: block;
+    background-color: #fadbd8;
+    border-left: 4px solid var(--cor-erro);
+    color: var(--cor-erro);
+}
+
+.mensagem.sucesso {
+    display: block;
+    background-color: #d5f4e6;
+    border-left: 4px solid var(--cor-sucesso);
+    color: var(--cor-sucesso);
+}
+
+.mensagem a {
+    color: inherit;
+    font-weight: bold;
+    text-decoration: underline;
+    display: inline-block;
+    margin-top: 10px;
+}
+
+/* Busca de Agendamentos */
+.busca-container {
+    display: flex;
+    gap: 10px;
+}
+
+.busca-container input {
+    flex: 1;
+}
+
+.busca-container .btn {
+    width: auto;
+    padding: 12px 30px;
+}
+
+/* Lista de Agendamentos */
+.agendamentos-lista {
+    margin-top: 20px;
+}
+
+.agendamento-item {
+    background: #f9f9f9;
+    border: 2px solid var(--cor-border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.agendamento-info {
+    flex: 1;
+    min-width: 250px;
+}
+
+.agendamento-info h3 {
+    color: var(--cor-primaria);
+    margin-bottom: 8px;
+}
+
+.agendamento-info p {
+    margin: 4px 0;
+    color: #666;
+    font-size: 0.95em;
+}
+
+.agendamento-info p strong {
+    color: var(--cor-primaria);
+}
+
+.agendamento-acoes {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.agendamento-acoes .btn {
+    width: auto;
+    padding: 10px 20px;
+    font-size: 0.9em;
+}
+
+.vazio {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+
+.vazio p {
+    font-size: 1.1em;
+    margin-bottom: 15px;
+}
+
+/* Card de Ações */
+.card-acoes {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.card-acoes .btn {
+    width: auto;
+    padding: 12px 30px;
+}
+
+/* Footer */
+footer {
+    background-color: var(--cor-primaria);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    border-radius: 10px;
+}
+
+footer p {
+    margin: 0;
+    opacity: 0.9;
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+    .logo h1 {
+        font-size: 2em;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    input,
+    select {
+        padding: 10px 12px;
+        font-size: 0.95em;
+    }
+
+    .horarios-grid {
+        grid-template-columns: repeat(auto-fit, minmax(75px, 1fr));
+    }
+
+    .servico-card {
+        min-width: 130px;
+        padding: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    .logo h1 {
+        font-size: 1.8em;
+    }
+
+    .logo p {
+        font-size: 0.95em;
+    }
+
+    header {
+        padding: 30px 15px;
+    }
+
+    .card-agendamento,
+    .card-acoes {
+        padding: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        font-size: 0.95em;
+    }
+
+    .agendamento-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .agendamento-acoes {
+        width: 100%;
+    }
+
+    .agendamento-acoes .btn {
+        width: 100%;
+    }
+
+    .busca-container {
+        flex-direction: column;
+    }
+
+    .busca-container .btn {
+        width: 100%;
+    }
+
+    input,
+    select {
+        font-size: 16px; /* Previne zoom no iPhone */
+        padding: 12px 12px;
+    }
+
+    /* Carrossel responsivo */
+    .carrossel-wrapper {
+        flex: 1;
+        overflow: hidden;
+        border-radius: 8px;
+        background: #f9f9f9;
+    }
+
+    .slot {
+        min-width: 110px;
+        padding: 12px;
+        font-size: 0.9em;
+    }
+
+    .servico-card {
+        min-width: 120px;
+        padding: 12px;
+        font-size: 0.9em;
+    }
+
+    .servico-nome {
+        font-size: 0.9em;
+        margin-bottom: 4px;
+    }
+
+    .servico-preco {
+        font-size: 0.8em;
+    }
+
+    .slot-data {
+        font-size: 0.85em;
+    }
+
+    .carrossel-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 1em;
+    }
+
+    .horarios-grid {
+        grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+        gap: 8px;
+    }
+
+    .horario-btn {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+
+    .data-selecionada-display {
+        font-size: 1.1em;
+        padding: 12px;
+    }
+
+    .modal-content {
+        width: 90%;
+        padding: 20px;
+    }
+
+    .modal-content h3 {
+        font-size: 1.2em;
+    }
+
+    .modal-close {
+        right: 15px;
+        top: 10px;
+        font-size: 24px;
+    }
+
+    .agendamento-info h3 {
+        font-size: 1em;
+    }
+
+    .agendamento-info p {
+        font-size: 0.9em;
+    }
+
+    footer {
+        padding: 15px;
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+
+    .logo h1 {
+        font-size: 1.5em;
+        margin-bottom: 5px;
+    }
+
+    .logo p {
+        font-size: 0.85em;
+    }
+
+    header {
+        padding: 25px 10px;
+        margin-bottom: 20px;
+    }
+
+    .card-agendamento,
+    .card-acoes {
+        padding: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    label {
+        font-size: 0.9em;
+        margin-bottom: 6px;
+    }
+
+    small {
+        font-size: 0.8em;
+    }
+
+    .slot {
+        min-width: 100px;
+        padding: 10px;
+    }
+
+    .slot-data {
+        font-size: 0.8em;
+        margin-bottom: 3px;
+    }
+
+    .servico-card {
+        min-width: 100px;
+        padding: 10px;
+    }
+
+    .servico-nome {
+        font-size: 0.85em;
+    }
+
+    .servico-preco {
+        font-size: 0.75em;
+    }
+
+    .carrossel-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9em;
+    }
+
+    .horarios-grid {
+        grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
+        gap: 6px;
+    }
+
+    .horario-btn {
+        padding: 9px 5px;
+        font-size: 0.85em;
+    }
+
+    .data-selecionada-display {
+        font-size: 1em;
+        padding: 10px;
+    }
+
+    .modal-content {
+        max-width: 95%;
+        padding: 15px;
+    }
+
+    .modal-content h3 {
+        font-size: 1.1em;
+        margin-bottom: 10px;
+    }
+
+    .modal-content p {
+        font-size: 0.9em;
+    }
+
+    .modal-botoes {
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .modal-botoes .btn {
+        padding: 10px 15px;
+        font-size: 0.9em;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 0.9em;
+    }
+
+    .agendamento-info {
+        flex: 1;
+        min-width: 100%;
+    }
+
+    .agendamento-info h3 {
+        font-size: 0.95em;
+        margin-bottom: 6px;
+    }
+
+    .agendamento-info p {
+        font-size: 0.8em;
+        margin: 3px 0;
+    }
+
+    footer {
+        padding: 12px;
+        font-size: 0.8em;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 8px;
+    }
+
+    .logo h1 {
+        font-size: 1.3em;
+    }
+
+    .logo p {
+        font-size: 0.8em;
+    }
+
+    header {
+        padding: 20px 8px;
+        margin-bottom: 15px;
+    }
+
+    .card-agendamento,
+    .card-acoes {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    .card-agendamento h2,
+    .card-acoes h2 {
+        font-size: 1.1em;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+    }
+
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    label {
+        font-size: 0.85em;
+    }
+
+    input,
+    select {
+        font-size: 15px;
+        padding: 10px;
+    }
+
+    .slot {
+        min-width: 90px;
+        padding: 8px;
+    }
+
+    .slot-data {
+        font-size: 0.75em;
+    }
+
+    .servico-card {
+        min-width: 90px;
+        padding: 8px;
+    }
+
+    .servico-nome {
+        font-size: 0.8em;
+    }
+
+    .servico-preco {
+        font-size: 0.7em;
+    }
+
+    .carrossel-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8em;
+    }
+
+    .carrossel-container {
+        gap: 8px;
+    }
+
+    .horarios-grid {
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        gap: 5px;
+    }
+
+    .horario-btn {
+        padding: 8px 4px;
+        font-size: 0.8em;
+    }
+
+    .data-selecionada-display {
+        font-size: 0.95em;
+        padding: 8px;
+    }
+
+    .slot-info.selecionado {
+        font-size: 0.85em;
+        padding: 10px;
+    }
+
+    .servico-selecionado-display {
+        font-size: 0.9em;
+        padding: 10px;
+    }
+
+    .modal-content {
+        max-width: 98%;
+        padding: 12px;
+    }
+
+    .modal-content h3 {
+        font-size: 1em;
+        margin-bottom: 8px;
+    }
+
+    .modal-content p {
+        font-size: 0.85em;
+        line-height: 1.5;
+    }
+
+    .modal-botoes {
+        gap: 6px;
+        margin-top: 10px;
+    }
+
+    .modal-botoes .btn {
+        padding: 9px 12px;
+        font-size: 0.85em;
+    }
+
+    .btn {
+        padding: 10px 15px;
+        font-size: 0.85em;
+    }
+
+    .btn-primary:hover,
+    .btn-secondary:hover {
+        transform: translateY(-1px);
+    }
+
+    .vazio p {
+        font-size: 1em;
+    }
+
+    .vazio {
+        padding: 30px 15px;
+    }
+
+    footer p {
+        font-size: 0.75em;
+    }
+}
+
+/* Estados de carregamento */
+.carregando {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(212, 175, 55, 0.3);
+    border-top: 3px solid var(--cor-secundaria);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Data Selecionada Display */
+.data-selecionada-display {
+    background: linear-gradient(135deg, var(--cor-primaria), #2c2c2c);
+    color: var(--cor-secundaria);
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+/* Carrossel de Data e Horário */
+.carrossel-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.carrossel-wrapper {
+    flex: 1;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #f9f9f9;
+}
+
+.carrossel {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 10px;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+}
+
+.carrossel::-webkit-scrollbar {
+    display: none;
+}
+
+.slot {
+    flex: 0 0 auto;
+    min-width: 140px;
+    padding: 15px;
+    background: white;
+    border: 2px solid var(--cor-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    user-select: none;
+}
+
+.slot:hover {
+    border-color: var(--cor-secundaria);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(212, 175, 55, 0.2);
+}
+
+.slot.selecionado {
+    border-color: var(--cor-secundaria);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.slot-data {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 10px;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.slot-hora {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: var(--cor-primaria);
+}
+
+.slot.selecionado .slot-hora {
+    color: var(--cor-secundaria);
+}
+
+/* Seção de Horários Disponíveis */
+.horarios-secao {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.horarios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.horario-btn {
+    padding: 12px;
+    background: white;
+    border: 2px solid var(--cor-border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95em;
+    font-weight: 600;
+    color: var(--cor-primaria);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.horario-btn:hover {
+    border-color: var(--cor-secundaria);
+    background: #f0f0f0;
+    transform: translateY(-2px);
+}
+
+.horario-btn.selecionado {
+    background: var(--cor-secundaria);
+    color: var(--cor-primaria);
+    border-color: var(--cor-secundaria);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.horario-btn:disabled {
+    background: #e0e0e0;
+    border-color: #ccc;
+    color: #999;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.carrossel-btn {
+    background: var(--cor-primaria);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.carrossel-btn:hover {
+    background: var(--cor-secundaria);
+    color: var(--cor-primaria);
+    transform: scale(1.1);
+}
+
+.carrossel-btn:active {
+    transform: scale(0.95);
+}
+
+.slot-info {
+    margin-top: 15px;
+    padding: 12px;
+    background: #f0f0f0;
+    border-radius: 6px;
+    text-align: center;
+    color: #666;
+    font-size: 0.95em;
+    min-height: 25px;
+}
+
+.slot-info.selecionado {
+    background: #d5f4e6;
+    border-left: 4px solid var(--cor-sucesso);
+    color: var(--cor-sucesso);
+    font-weight: 500;
+}
+
+/* Modal WhatsApp */
+.modal-whatsapp {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-whatsapp.ativa {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    max-width: 500px;
+    width: 90%;
+    animation: slideIn 0.3s ease;
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #999;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.modal-close:hover {
+    color: var(--cor-primaria);
+}
+
+.modal-content h3 {
+    color: var(--cor-primaria);
+    margin-bottom: 15px;
+    border-bottom: 2px solid var(--cor-secundaria);
+    padding-bottom: 10px;
+}
+
+.modal-content p {
+    color: #666;
+    line-height: 1.6;
+}
+
+.modal-botoes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.modal-botoes .btn {
+    width: 100%;
+    margin: 0;
+}
+
+.modal-botoes #link-whatsapp-barbearia {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    padding: 12px 30px;
+}
+
+/* Carrossel de Serviços */
+.servico-container {
+    margin-bottom: 15px;
+}
+
+.servico-selecionado-display {
+    background: #f0f0f0;
+    padding: 12px;
+    border-radius: 6px;
+    text-align: center;
+    color: var(--cor-primaria);
+    font-weight: 500;
+    margin-top: 10px;
+    min-height: 20px;
+}
+
+.servico-card {
+    flex: 0 0 auto;
+    min-width: 150px;
+    padding: 15px;
+    background: white;
+    border: 2px solid var(--cor-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    user-select: none;
+}
+
+.servico-card:hover {
+    border-color: var(--cor-secundaria);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(212, 175, 55, 0.2);
+}
+
+.servico-card.selecionado {
+    border-color: var(--cor-secundaria);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.servico-nome {
+    font-weight: 600;
+    color: var(--cor-primaria);
+    margin-bottom: 5px;
+    font-size: 1em;
+}
+
+.servico-preco {
+    font-size: 0.9em;
+    color: var(--cor-secundaria);
+    font-weight: bold;
+}
+
+.servico-card.selecionado .servico-nome {
+    color: var(--cor-secundaria);
+}

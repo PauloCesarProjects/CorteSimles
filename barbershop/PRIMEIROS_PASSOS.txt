@@ -1,0 +1,152 @@
+🚀 COMO EXECUTAR O SISTEMA PELA PRIMEIRA VEZ
+===============================================
+
+## PASSO 1: Abrir o Terminal
+
+### Windows:
+1. Navegue até a pasta: c:\Users\Paulo César\Documents\EasyCorte\barbershop
+2. Pressione Shift + clique direito na pasta vazia
+3. Selecione: "Abrir PowerShell aqui" ou "Abrir Janela de Comando aqui"
+
+OU simplesmente clique 2 vezes em: start.bat
+
+### macOS / Linux:
+1. Abra o Terminal
+2. Navigate até a pasta:
+   cd ~/Documents/EasyCorte/barbershop
+
+## PASSO 2: Instalar Dependências
+
+Execute no terminal:
+```
+npm install
+```
+
+Aguarde... isso pode levar alguns minutos (será baixado ~300MB)
+
+Você verá mensagens como:
+  npm notice
+  npm notice created a lockfile as package-lock.json
+  added XXX packages
+
+Se tudo correr bem, verá: "✓ up to date" ou similar
+
+## PASSO 3: Iniciar o Servidor
+
+Execute:
+```
+npm start
+```
+
+Você verá algo como:
+```
+Servidor rodando em http://localhost:3000
+Conectado ao banco de dados SQLite
+```
+
+## PASSO 4: Acessar o Site
+
+1. Abra seu navegador favorito
+2. Digite na barra de endereços:
+   http://localhost:3000
+3. Pressione Enter
+
+## PASSO 5: Testar o Sistema
+
+### Teste 1: Fazer um Agendamento
+1. Preencha o nome
+2. Digite seu WhatsApp (ex: (11) 99999-9999)
+3. Selecione um serviço
+4. Escolha uma data futura
+5. Escolha um horário
+6. Clique em "Agendar"
+7. Clique no link "Confirmar via WhatsApp"
+
+### Teste 2: Consultar Agendamentos
+1. Clique em "Ver Meus Agendamentos"
+2. Digite o mesmo WhatsApp
+3. Clique em "Buscar"
+4. Você verá seus agendamentos listados
+
+### Teste 3: Cancelar Agendamento
+1. Na lista de agendamentos
+2. Clique em "Cancelar" no agendamento desejado
+3. Confirme a ação
+
+## PASSO 6: Parar o Servidor
+
+No terminal, pressione:
+```
+Ctrl + C
+```
+
+Você verá:
+```
+^C
+```
+
+## SOLUÇÃO DE PROBLEMAS
+
+### Erro: "npm: comando não encontrado"
+- Instale Node.js de: https://nodejs.org/
+- Reinicie o terminal após instalar
+
+### Erro: "EADDRINUSE :::3000"
+- Porta 3000 já está em uso
+- Windows: Ctrl+C no terminal com npm start
+- Ou feche outros programas usando a porta
+
+### Erro: "Cannot find module"
+- Execute novamente: npm install
+
+### Site não carrega
+- Verifique se está digitando corretamente: http://localhost:3000
+- Verifique se o servidor está rodando (você deve ver a mensagem no terminal)
+- Tente abrir em outra aba ou outro navegador
+
+## DEPOIS DE TESTAR
+
+### Para Personalizar:
+Veja o arquivo: INICIO_RAPIDO.md
+
+### Para Entender Tudo:
+Leia: README.md
+
+### Para Configuração Avançada:
+Leia: CONFIGURACAO.md
+
+### Para Testar a API:
+Use: TESTES_API.md
+
+
+📊 EXEMPLO DE DADOS TESTE
+
+Nome: João Silva
+WhatsApp: (11) 99999-9999
+Serviço: Corte de Cabelo
+Data: (escolha um dia futuro)
+Horário: 14:30
+
+
+🎯 PRÓXIMOS PASSOS
+
+1. ✅ Instalar dependências (npm install)
+2. ✅ Iniciar servidor (npm start)
+3. ✅ Acessar site (http://localhost:3000)
+4. ✅ Testar agendamento
+5. ✅ Testar consulta de agendamentos
+6. ✅ Personalizar cores e textos
+7. 🚀 Deploy em servidor
+
+
+💡 DICAS
+
+- Abra o console do navegador (F12) para ver logs
+- Use Ctrl+Shift+Del para limpar cache se tiver problemas
+- Teste em diferentes navegadores
+- Acesse pelo celular usando o IP do seu computador (veja CONFIGURACAO.md)
+
+
+🎉 PRONTO! Seu sistema está rodando!
+
+Dúvidas? Consulte os arquivos de documentação (.md)
