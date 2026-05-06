@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "functions": {
+    "barbershop/api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/barbershop/api/$1"
+    },
+    {
+      "src": "/",
+      "dest": "/barbershop/public/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/barbershop/public/$1"
+    }
+  ]
+}
