@@ -644,7 +644,7 @@ async function confirmarCancelamento() {
             console.log('Enviando mensagem de cancelamento...');
             enviarMensagemCancelamento(agendamento);
 
-            mostrarMensagemBusca('Agendamento cancelado com sucesso! Mensagem enviada para o barbeiro.', 'sucesso');
+            mostrarMensagemBusca('✅ Agendamento cancelado! Verifique se o WhatsApp foi aberto ou copie o link mostrado.', 'sucesso');
 
             // Atualizar a lista após cancelamento
             const whatsapp = document.getElementById('whatsapp-busca').value.replace(/\D/g, '');
@@ -737,56 +737,57 @@ function removerAgendamentoLocal(id) {
 
 // Enviar mensagem de cancelamento via WhatsApp
 function enviarMensagemCancelamento(agendamento) {
+    console.log('🚀 === FUNÇÃO enviarMensagemCancelamento CHAMADA ===');
+    console.log('📋 Agendamento recebido:', agendamento);
+
     const servicoNome = obterNomeServico(agendamento.servico);
     const dataFormatada = formatarDataCompleta(agendamento.data_agendamento);
 
     // Mensagem de cancelamento para a barbearia
     const mensagem = `CANCELAMENTO DE AGENDAMENTO!\n\n❌ Agendamento CANCELADO\n\n👤 Cliente: ${agendamento.nome_cliente}\n📱 WhatsApp: +55${agendamento.whatsapp}\n✂️ Serviço: ${servicoNome}\n📅 Data: ${dataFormatada}\n🕐 Horário: ${agendamento.hora_inicio}\n\nID do Agendamento: #${agendamento.id}`;
 
-    const linkWhatsapp = `https://wa.me/55${WHATSAPP_BARBEARIA}?text=${encodeURIComponent(mensagem)}`;
+    const numeroWhatsApp = WHATSAPP_BARBEARIA;
+    console.log('📞 Número do WhatsApp da barbearia:', numeroWhatsApp);
 
-    console.log('Tentando abrir WhatsApp com link:', linkWhatsapp);
-    console.log('Mensagem:', mensagem);
+    const linkWhatsapp = `https://wa.me/55${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
 
+    console.log('🔗 Link WhatsApp gerado:', linkWhatsapp);
+    console.log('💬 Mensagem a ser enviada:', mensagem);
+
+    // Método direto: abrir WhatsApp
     try {
-        // Método 1: Tentar abrir em nova aba
-        const novaAba = window.open(linkWhatsapp, '_blank', 'noopener,noreferrer');
+        console.log('📱 Tentando abrir WhatsApp...');
+        const novaJanela = window.open(linkWhatsapp, '_blank');
 
-        // Método 2: Se foi bloqueado, tentar criar link e clicar
-        if (!novaAba || novaAba.closed || typeof novaAba.closed === 'undefined') {
-            console.log('Popup bloqueado, tentando método alternativo...');
-
-            // Criar um link temporário e simular clique
-            const linkTemp = document.createElement('a');
-            linkTemp.href = linkWhatsapp;
-            linkTemp.target = '_blank';
-            linkTemp.rel = 'noopener noreferrer';
-            linkTemp.style.display = 'none';
-
-            document.body.appendChild(linkTemp);
-            linkTemp.click();
-            document.body.removeChild(linkTemp);
-
-            console.log('Link temporário clicado');
+        if (novaJanela) {
+            console.log('✅ WhatsApp aberto com sucesso!');
         } else {
-            console.log('WhatsApp aberto com sucesso na nova aba');
+            console.log('⚠️ Popup bloqueado pelo navegador');
+            throw new Error('Popup blocked');
         }
     } catch (erro) {
-        console.error('Erro ao abrir WhatsApp:', erro);
+        console.error('❌ Erro ao abrir WhatsApp:', erro);
 
-        // Método 3: Fallback - mostrar link para copiar
-        const linkCopiar = `https://wa.me/55${WHATSAPP_BARBEARIA}?text=${encodeURIComponent(mensagem)}`;
-        console.log('Link para copiar manualmente:', linkCopiar);
+        // Fallback: mostrar instruções claras
+        const instrucao = `❌ O WhatsApp não pôde ser aberto automaticamente.\n\n📋 COPIE ESTE LINK e cole no navegador:\n\n${linkWhatsapp}\n\nOu envie esta mensagem manualmente:\n\n${mensagem}`;
+
+        console.log('📋 Instruções para o usuário:', instrucao);
 
         // Tentar copiar para área de transferência
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(linkCopiar).then(() => {
-                alert('Link do WhatsApp copiado para a área de transferência! Cole no navegador.');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(linkWhatsapp).then(() => {
+                alert('✅ Link copiado! Cole no navegador para abrir o WhatsApp.');
             }).catch(() => {
-                alert(`Não foi possível abrir o WhatsApp automaticamente.\n\nCopie este link e abra no navegador:\n\n${linkCopiar}`);
+                alert(instrucao);
             });
         } else {
-            alert(`Não foi possível abrir o WhatsApp automaticamente.\n\nCopie este link e abra no navegador:\n\n${linkCopiar}`);
+            alert(instrucao);
         }
     }
+
+    console.log('🏁 === FIM DO ENVIO DE MENSAGEM WHATSAPP ===');
+    console.log('💡 DICAS: Se o WhatsApp não abrir, verifique:');
+    console.log('   1. Permissões de popup no navegador');
+    console.log('   2. Bloqueadores de anúncios');
+    console.log('   3. Configurações de privacidade');
 }
