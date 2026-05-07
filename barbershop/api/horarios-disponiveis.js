@@ -40,19 +40,15 @@ module.exports = async (req, res) => {
   }
 };
 
-// Gerar horários (13:30 - 19:30, 30 em 30 minutos)
+// Gerar horários (14:00 - 19:30, 30 em 30 minutos)
 function gerarHorarios() {
   const horarios = [];
-  const inicio = 13;
+  const inicio = 14;
   const fim = 20;
   
   for (let hora = inicio; hora < fim; hora++) {
-    if (hora === 13) {
-      horarios.push('13:30');
-    } else {
-      horarios.push(`${hora.toString().padStart(2, '0')}:00`);
-      horarios.push(`${hora.toString().padStart(2, '0')}:30`);
-    }
+    horarios.push(`${hora.toString().padStart(2, '0')}:00`);
+    horarios.push(`${hora.toString().padStart(2, '0')}:30`);
   }
   
   return horarios;
