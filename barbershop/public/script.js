@@ -208,7 +208,7 @@ function renderizarHorarios(horarios) {
         horariosFiltrados = horarios.filter(horario => {
             const [hora, minuto] = horario.split(':').map(Number);
             const minutoHorario = hora * 60 + minuto;
-            return minutoHorario > minutoAtual;
+            return minutoHorario >= minutoAtual;
         });
     }
     
