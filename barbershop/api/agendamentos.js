@@ -28,20 +28,19 @@ module.exports = async (req, res) => {
 
       // Verificar se a data é válida e não está no passado
       const [ano, mes, dia] = data.split('-').map(Number);
+      const dadosAgoraSP = obterDataHoraSaoPaulo();
       const dataAgendamento = new Date(ano, mes - 1, dia, 0, 0, 0);
-      const dataAtual = new Date();
-      const dataAtualMeia = new Date(dataAtual.getFullYear(), dataAtual.getMonth(), dataAtual.getDate(), 0, 0, 0);
+      const dataAtualMeia = new Date(dadosAgoraSP.getFullYear(), dadosAgoraSP.getMonth(), dadosAgoraSP.getDate(), 0, 0, 0);
 
       if (dataAgendamento < dataAtualMeia) {
         return res.status(400).json({ erro: 'Não é possível agendar para datas passadas' });
       }
 
-      // Se for hoje, verificar se o horário não está no passado
+      // Se for hoje no horário de Brasília, verificar se o horário não está no passado
       if (dataAgendamento.getTime() === dataAtualMeia.getTime()) {
         const [horaAgendamento, minutoAgendamento] = hora.split(':').map(Number);
-        const agora = new Date();
-        const horaAtual = agora.getHours();
-        const minutoAtual = agora.getMinutes();
+        const horaAtual = dadosAgoraSP.getHours();
+        const minutoAtual = dadosAgoraSP.getMinutes();
 
         if (horaAgendamento < horaAtual || (horaAgendamento === horaAtual && minutoAgendamento <= minutoAtual)) {
           return res.status(400).json({ erro: 'Não é possível agendar para horários que já passaram' });
@@ -104,3 +103,29 @@ module.exports = async (req, res) => {
     res.status(500).json({ erro: 'Erro interno do servidor' });
   }
 };
+
+function obterDataHoraSaoPaulo() {
+  const agora = new Date();
+  const partes = new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }).formatToParts(agora).reduce((acc, parte) => {
+    if (parte.type !== 'literal') acc[parte.type] = parte.value;
+    return acc;
+  }, {});
+
+  return new Date(
+    Number(partes.year),
+    Number(partes.month) - 1,
+    Number(partes.day),
+    Number(partes.hour),
+    Number(partes.minute),
+    Number(partes.second)
+  );
+}

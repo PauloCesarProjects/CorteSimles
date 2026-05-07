@@ -101,21 +101,23 @@ function atualizarServicoDisplay() {
 async function gerarSlotsCarrossel() {
     const servico = SERVICOS[servicoIndex].id;
 
-    // Gerar próximas 14 dias
+    // Gerar próximos 14 dias úteis (sem domingos)
     const slots = [];
     const hoje = new Date();
-    
-    for (let i = 0; i < 14; i++) {
-        const data = new Date(hoje);
-        data.setDate(data.getDate() + i);
-        
-        const dataStr = data.toISOString().split('T')[0];
-        
-        slots.push({
-            data: dataStr,
-            dataFormatada: formatarDataCarrossel(data),
-            diaSemana: obterDiaSemana(data),
-        });
+    const data = new Date(hoje);
+
+    while (slots.length < 14) {
+        const diaSemana = data.getDay();
+        if (diaSemana !== 0) {
+            const dataStr = data.toISOString().split('T')[0];
+            slots.push({
+                data: dataStr,
+                dataFormatada: formatarDataCarrossel(data),
+                diaSemana: obterDiaSemana(data),
+            });
+        }
+
+        data.setDate(data.getDate() + 1);
     }
 
     dadosCarrossel = slots;
