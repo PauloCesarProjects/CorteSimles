@@ -358,34 +358,45 @@ async function criarAgendamento(evento) {
         botao.disabled = true;
         botao.innerHTML = '<span class="spinner"></span> Agendando...';
 
-        const resposta = await fetch(`${API_BASE}/agendamentos`, {
+        // Verificar se o horário já está ocupado (usando API)
+        const respostaVerificacao = await fetch(`${API_BASE}/horarios-disponiveis`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                nome,
-                whatsapp,
-                servico,
-                data,
-                hora
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data, servico })
         });
 
-        const dados = await resposta.json();
-
-        if (resposta.ok) {
-            mostrarModalConfirmacao(dados, nome, servico, data, hora, whatsapp);
-            limparFormulario();
-        } else {
-            mostrarMensagem('Erro: ' + dados.erro, 'erro');
+        if (respostaVerificacao.ok) {
+            const dadosVerificacao = await respostaVerificacao.json();
+            if (!dadosVerificacao.horarios.includes(hora)) {
+                mostrarMensagem('Este horário não está mais disponível', 'erro');
+                botao.disabled = false;
+                botao.innerHTML = 'Agendar';
+                return;
+            }
         }
+
+        // Criar agendamento no localStorage
+        const agendamento = {
+            id: Date.now().toString(),
+            nome_cliente: nome,
+            whatsapp: whatsapp,
+            servico: servico,
+            data_agendamento: data,
+            hora_inicio: hora,
+            criado_em: new Date().toISOString()
+        };
+
+        salvarAgendamentoLocal(agendamento);
+
+        // Mostrar modal de confirmação
+        mostrarModalConfirmacao(agendamento, nome, servico, data, hora, whatsapp);
+        limparFormulario();
 
         botao.disabled = false;
         botao.innerHTML = 'Agendar';
     } catch (erro) {
         console.error('Erro:', erro);
-        mostrarMensagem('Erro ao conectar com o servidor', 'erro');
+        mostrarMensagem('Erro ao criar agendamento', 'erro');
         const botao = document.querySelector('#form-agendamento button[type="submit"]');
         botao.disabled = false;
         botao.innerHTML = 'Agendar';
@@ -393,16 +404,15 @@ async function criarAgendamento(evento) {
 }
 
 // Mostrar modal de confirmação
-function mostrarModalConfirmacao(dados, nome, servico, data, hora, whatsapp) {
+function mostrarModalConfirmacao(agendamento, nome, servico, data, hora, whatsapp) {
     const servicoNome = obterNomeServico(servico);
-    
+
     // Encontrar o slot selecionado para pegar as informações formatadas
     const slot = dadosCarrossel.find(s => s.data === data);
     const dataFormatadaModal = slot ? `${slot.diaSemana}, ${slot.dataFormatada}` : formatarDataCompleta(data);
-    
+
     // Mensagem para a barbearia
-    const mensagem = `Novo Agendamento!\n\n👤 Cliente: ${nome}\n📱 WhatsApp: +55${whatsapp}\n✂️ Serviço: ${servicoNome}\n📅 Data: ${dataFormatadaModal}\n🕐 Horário: ${hora}\n\nID do Agendamento: #${dados.id}`;
-    
+    const mensagem = `Novo Agendamento!\n\n👤 Cliente: ${nome}\n📱 WhatsApp: +55${whatsapp}\n✂️ Serviço: ${servicoNome}\n📅 Data: ${dataFormatadaModal}\n🕐 Horário: ${hora}\n\nID do Agendamento: #${agendamento.id}`;
     const linkWhatsapp = `https://wa.me/55${WHATSAPP_BARBEARIA}?text=${encodeURIComponent(mensagem)}`;
     
     document.getElementById('modal-mensagem').innerHTML = `
@@ -487,20 +497,16 @@ async function buscarAgendamentos() {
         botao.disabled = true;
         botao.innerHTML = '<span class="spinner"></span>';
 
-        const resposta = await fetch(`${API_BASE}/agendamentos?whatsapp=${whatsapp}`);
-        const dados = await resposta.json();
+        // Buscar agendamentos do localStorage
+        const agendamentos = obterAgendamentosPorWhatsapp(whatsapp);
 
-        if (resposta.ok) {
-            exibirAgendamentos(dados.agendamentos);
-        } else {
-            mostrarMensagemBusca('Erro ao buscar agendamentos', 'erro');
-        }
+        exibirAgendamentos(agendamentos);
 
         botao.disabled = false;
         botao.innerHTML = 'Buscar';
     } catch (erro) {
         console.error('Erro:', erro);
-        mostrarMensagemBusca('Erro ao conectar com o servidor', 'erro');
+        mostrarMensagemBusca('Erro ao buscar agendamentos', 'erro');
     }
 }
 
@@ -561,14 +567,25 @@ async function cancelarAgendamento(id) {
     }
 
     try {
-        const resposta = await fetch(`${API_BASE}/cancelar-agendamento?id=${id}`, {
-            method: 'DELETE'
-        });
+        // Buscar o agendamento antes de remover
+        const agendamentos = obterAgendamentosLocais();
+        const agendamento = agendamentos.find(a => a.id === id);
 
-        const dados = await resposta.json();
+        if (!agendamento) {
+            mostrarMensagemBusca('Agendamento não encontrado', 'erro');
+            return;
+        }
 
-        if (resposta.ok) {
+        // Remover do localStorage
+        const removido = removerAgendamentoLocal(id);
+
+        if (removido) {
+            // Enviar mensagem de cancelamento via WhatsApp
+            enviarMensagemCancelamento(agendamento);
+
             mostrarMensagemBusca('Agendamento cancelado com sucesso', 'sucesso');
+
+            // Atualizar a lista após cancelamento
             const whatsapp = document.getElementById('whatsapp-busca').value.replace(/\D/g, '');
             setTimeout(() => {
                 buscarAgendamentos();
@@ -576,11 +593,11 @@ async function cancelarAgendamento(id) {
                 carregarHorariosData();
             }, 1000);
         } else {
-            mostrarMensagemBusca('Erro ao cancelar agendamento: ' + dados.erro, 'erro');
+            mostrarMensagemBusca('Erro ao cancelar agendamento', 'erro');
         }
     } catch (erro) {
         console.error('Erro:', erro);
-        mostrarMensagemBusca('Erro ao conectar com o servidor', 'erro');
+        mostrarMensagemBusca('Erro ao cancelar agendamento', 'erro');
     }
 }
 
@@ -613,4 +630,42 @@ function formatarDataCompleta(dataString) {
         .split(' ')
         .map((palavra, index) => index === 0 ? palavra.charAt(0).toUpperCase() + palavra.slice(1) : palavra)
         .join(' ');
+}
+
+// Funções para localStorage de agendamentos
+function salvarAgendamentoLocal(agendamento) {
+    const agendamentos = obterAgendamentosLocais();
+    agendamentos.push(agendamento);
+    localStorage.setItem('agendamentos', JSON.stringify(agendamentos));
+}
+
+function obterAgendamentosLocais() {
+    const agendamentos = localStorage.getItem('agendamentos');
+    return agendamentos ? JSON.parse(agendamentos) : [];
+}
+
+function obterAgendamentosPorWhatsapp(whatsapp) {
+    const agendamentos = obterAgendamentosLocais();
+    return agendamentos.filter(a => a.whatsapp === whatsapp);
+}
+
+function removerAgendamentoLocal(id) {
+    const agendamentos = obterAgendamentosLocais();
+    const filtrados = agendamentos.filter(a => a.id !== id);
+    localStorage.setItem('agendamentos', JSON.stringify(filtrados));
+    return agendamentos.length !== filtrados.length;
+}
+
+// Enviar mensagem de cancelamento via WhatsApp
+function enviarMensagemCancelamento(agendamento) {
+    const servicoNome = obterNomeServico(agendamento.servico);
+    const dataFormatada = formatarDataCompleta(agendamento.data_agendamento);
+
+    // Mensagem de cancelamento para a barbearia
+    const mensagem = `CANCELAMENTO DE AGENDAMENTO!\n\n❌ Agendamento CANCELADO\n\n👤 Cliente: ${agendamento.nome_cliente}\n📱 WhatsApp: +55${agendamento.whatsapp}\n✂️ Serviço: ${servicoNome}\n📅 Data: ${dataFormatada}\n🕐 Horário: ${agendamento.hora_inicio}\n\nID do Agendamento: #${agendamento.id}`;
+
+    const linkWhatsapp = `https://wa.me/55${WHATSAPP_BARBEARIA}?text=${encodeURIComponent(mensagem)}`;
+
+    // Abrir WhatsApp em nova aba
+    window.open(linkWhatsapp, '_blank');
 }
