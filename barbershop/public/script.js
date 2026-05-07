@@ -529,10 +529,12 @@ function exibirAgendamentos(agendamentos) {
     agendamentos.forEach(agendamento => {
         const dataFormatada = formatarDataCompleta(agendamento.data_agendamento);
         const servicoNome = obterNomeServico(agendamento.servico);
-        const dataAgendamento = new Date(agendamento.data_agendamento);
-        const dataAtual = new Date();
-        dataAtual.setHours(0, 0, 0, 0);
-        const podeCancelar = dataAgendamento >= dataAtual;
+        const dataAgendamento = new Date(agendamento.data_agendamento + 'T00:00:00');
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        const dataAgendamentoMeiaNoite = new Date(dataAgendamento);
+        dataAgendamentoMeiaNoite.setHours(0, 0, 0, 0);
+        const podeCancelar = dataAgendamentoMeiaNoite >= hoje;
 
         html += `
             <div class="agendamento-item">
