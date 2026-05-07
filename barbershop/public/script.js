@@ -487,6 +487,8 @@ function voltarParaAgendamento() {
 async function buscarAgendamentos() {
     const whatsapp = document.getElementById('whatsapp-busca').value.replace(/\D/g, '');
 
+    console.log('Buscando agendamentos para WhatsApp:', whatsapp);
+
     if (whatsapp.length < 10) {
         mostrarMensagemBusca('Por favor, digite um número de WhatsApp válido', 'erro');
         return;
@@ -499,6 +501,7 @@ async function buscarAgendamentos() {
 
         // Buscar agendamentos do localStorage
         const agendamentos = obterAgendamentosPorWhatsapp(whatsapp);
+        console.log('Agendamentos encontrados:', agendamentos.length);
 
         exibirAgendamentos(agendamentos);
 
@@ -609,7 +612,12 @@ function fecharModalCancelamento() {
 async function confirmarCancelamento() {
     const id = window.agendamentoParaCancelar;
 
-    if (!id) return;
+    if (!id) {
+        console.error('ID do agendamento não encontrado');
+        return;
+    }
+
+    console.log('Iniciando cancelamento do agendamento ID:', id);
 
     try {
         // Fechar modal
@@ -620,31 +628,39 @@ async function confirmarCancelamento() {
         const agendamento = agendamentos.find(a => a.id === id);
 
         if (!agendamento) {
+            console.error('Agendamento não encontrado para ID:', id);
             mostrarMensagemBusca('Agendamento não encontrado', 'erro');
             return;
         }
 
+        console.log('Agendamento encontrado:', agendamento);
+
         // Remover do localStorage
         const removido = removerAgendamentoLocal(id);
+        console.log('Agendamento removido do localStorage:', removido);
 
         if (removido) {
             // Enviar mensagem de cancelamento via WhatsApp
+            console.log('Enviando mensagem de cancelamento...');
             enviarMensagemCancelamento(agendamento);
 
             mostrarMensagemBusca('Agendamento cancelado com sucesso! Mensagem enviada para o barbeiro.', 'sucesso');
 
             // Atualizar a lista após cancelamento
             const whatsapp = document.getElementById('whatsapp-busca').value.replace(/\D/g, '');
+            console.log('Atualizando lista de agendamentos...');
             setTimeout(() => {
                 buscarAgendamentos();
                 // Atualizar horários disponíveis após cancelamento
+                console.log('Atualizando horários disponíveis...');
                 carregarHorariosData();
             }, 1000);
         } else {
+            console.error('Erro ao remover agendamento do localStorage');
             mostrarMensagemBusca('Erro ao cancelar agendamento', 'erro');
         }
     } catch (erro) {
-        console.error('Erro:', erro);
+        console.error('Erro ao cancelar agendamento:', erro);
         mostrarMensagemBusca('Erro ao cancelar agendamento', 'erro');
     }
 }
@@ -694,14 +710,29 @@ function obterAgendamentosLocais() {
 
 function obterAgendamentosPorWhatsapp(whatsapp) {
     const agendamentos = obterAgendamentosLocais();
-    return agendamentos.filter(a => a.whatsapp === whatsapp);
+    console.log('Total de agendamentos no localStorage:', agendamentos.length);
+    console.log('Filtrando por WhatsApp:', whatsapp);
+
+    const filtrados = agendamentos.filter(a => a.whatsapp === whatsapp);
+    console.log('Agendamentos filtrados:', filtrados.length);
+
+    return filtrados;
 }
 
 function removerAgendamentoLocal(id) {
+    console.log('Removendo agendamento ID:', id);
     const agendamentos = obterAgendamentosLocais();
+    console.log('Agendamentos antes da remoção:', agendamentos.length);
+
     const filtrados = agendamentos.filter(a => a.id !== id);
+    console.log('Agendamentos após filtro:', filtrados.length);
+
     localStorage.setItem('agendamentos', JSON.stringify(filtrados));
-    return agendamentos.length !== filtrados.length;
+
+    const removido = agendamentos.length !== filtrados.length;
+    console.log('Agendamento removido com sucesso:', removido);
+
+    return removido;
 }
 
 // Enviar mensagem de cancelamento via WhatsApp
@@ -714,27 +745,48 @@ function enviarMensagemCancelamento(agendamento) {
 
     const linkWhatsapp = `https://wa.me/55${WHATSAPP_BARBEARIA}?text=${encodeURIComponent(mensagem)}`;
 
-    console.log('Tentando abrir WhatsApp:', linkWhatsapp);
+    console.log('Tentando abrir WhatsApp com link:', linkWhatsapp);
+    console.log('Mensagem:', mensagem);
 
     try {
-        // Tentar abrir em nova aba
-        const novaAba = window.open(linkWhatsapp, '_blank');
+        // Método 1: Tentar abrir em nova aba
+        const novaAba = window.open(linkWhatsapp, '_blank', 'noopener,noreferrer');
 
-        // Se foi bloqueado pelo popup blocker, tentar redirecionar na mesma aba
+        // Método 2: Se foi bloqueado, tentar criar link e clicar
         if (!novaAba || novaAba.closed || typeof novaAba.closed === 'undefined') {
-            console.log('Popup bloqueado, tentando redirecionar...');
-            // Criar um link temporário e clicar nele
+            console.log('Popup bloqueado, tentando método alternativo...');
+
+            // Criar um link temporário e simular clique
             const linkTemp = document.createElement('a');
             linkTemp.href = linkWhatsapp;
             linkTemp.target = '_blank';
+            linkTemp.rel = 'noopener noreferrer';
             linkTemp.style.display = 'none';
+
             document.body.appendChild(linkTemp);
             linkTemp.click();
             document.body.removeChild(linkTemp);
+
+            console.log('Link temporário clicado');
+        } else {
+            console.log('WhatsApp aberto com sucesso na nova aba');
         }
     } catch (erro) {
         console.error('Erro ao abrir WhatsApp:', erro);
-        // Fallback: mostrar o link para o usuário copiar
-        alert(`Não foi possível abrir o WhatsApp automaticamente. Copie este link e abra no navegador:\n\n${linkWhatsapp}`);
+
+        // Método 3: Fallback - mostrar link para copiar
+        const linkCopiar = `https://wa.me/55${WHATSAPP_BARBEARIA}?text=${encodeURIComponent(mensagem)}`;
+        console.log('Link para copiar manualmente:', linkCopiar);
+
+        // Tentar copiar para área de transferência
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(linkCopiar).then(() => {
+                alert('Link do WhatsApp copiado para a área de transferência! Cole no navegador.');
+            }).catch(() => {
+                alert(`Não foi possível abrir o WhatsApp automaticamente.\n\nCopie este link e abra no navegador:\n\n${linkCopiar}`);
+            });
+        } else {
+            alert(`Não foi possível abrir o WhatsApp automaticamente.\n\nCopie este link e abra no navegador:\n\n${linkCopiar}`);
+        }
     }
 }
