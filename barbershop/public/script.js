@@ -564,12 +564,58 @@ function exibirAgendamentos(agendamentos) {
 
 // Cancelar agendamento
 async function cancelarAgendamento(id) {
-    if (!confirm('Tem certeza que deseja cancelar este agendamento?')) {
+    // Buscar o agendamento antes de mostrar o modal
+    const agendamentos = obterAgendamentosLocais();
+    const agendamento = agendamentos.find(a => a.id === id);
+
+    if (!agendamento) {
+        mostrarMensagemBusca('Agendamento não encontrado', 'erro');
         return;
     }
 
+    // Mostrar modal de confirmação personalizado
+    mostrarModalCancelamento(agendamento);
+}
+
+// Mostrar modal de cancelamento
+function mostrarModalCancelamento(agendamento) {
+    const servicoNome = obterNomeServico(agendamento.servico);
+    const dataFormatada = formatarDataCompleta(agendamento.data_agendamento);
+
+    document.getElementById('modal-cancelamento-mensagem').innerHTML = `
+        <strong>Tem certeza que deseja cancelar este agendamento?</strong><br><br>
+        <strong>✂️ ${servicoNome}</strong><br>
+        📅 ${dataFormatada}<br>
+        🕐 ${agendamento.hora_inicio}<br>
+        👤 ${agendamento.nome_cliente}<br><br>
+        <span style="color: #e74c3c; font-weight: bold;">⚠️ Esta ação não pode ser desfeita!</span>
+    `;
+
+    // Armazenar o ID do agendamento para uso posterior
+    window.agendamentoParaCancelar = agendamento.id;
+
+    const modal = document.getElementById('modal-cancelamento');
+    modal.classList.add('ativa');
+}
+
+// Fechar modal de cancelamento
+function fecharModalCancelamento() {
+    const modal = document.getElementById('modal-cancelamento');
+    modal.classList.remove('ativa');
+    window.agendamentoParaCancelar = null;
+}
+
+// Confirmar cancelamento
+async function confirmarCancelamento() {
+    const id = window.agendamentoParaCancelar;
+
+    if (!id) return;
+
     try {
-        // Buscar o agendamento antes de remover
+        // Fechar modal
+        fecharModalCancelamento();
+
+        // Buscar o agendamento novamente
         const agendamentos = obterAgendamentosLocais();
         const agendamento = agendamentos.find(a => a.id === id);
 
@@ -585,7 +631,7 @@ async function cancelarAgendamento(id) {
             // Enviar mensagem de cancelamento via WhatsApp
             enviarMensagemCancelamento(agendamento);
 
-            mostrarMensagemBusca('Agendamento cancelado com sucesso', 'sucesso');
+            mostrarMensagemBusca('Agendamento cancelado com sucesso! Mensagem enviada para o barbeiro.', 'sucesso');
 
             // Atualizar a lista após cancelamento
             const whatsapp = document.getElementById('whatsapp-busca').value.replace(/\D/g, '');
@@ -668,6 +714,27 @@ function enviarMensagemCancelamento(agendamento) {
 
     const linkWhatsapp = `https://wa.me/55${WHATSAPP_BARBEARIA}?text=${encodeURIComponent(mensagem)}`;
 
-    // Abrir WhatsApp em nova aba
-    window.open(linkWhatsapp, '_blank');
+    console.log('Tentando abrir WhatsApp:', linkWhatsapp);
+
+    try {
+        // Tentar abrir em nova aba
+        const novaAba = window.open(linkWhatsapp, '_blank');
+
+        // Se foi bloqueado pelo popup blocker, tentar redirecionar na mesma aba
+        if (!novaAba || novaAba.closed || typeof novaAba.closed === 'undefined') {
+            console.log('Popup bloqueado, tentando redirecionar...');
+            // Criar um link temporário e clicar nele
+            const linkTemp = document.createElement('a');
+            linkTemp.href = linkWhatsapp;
+            linkTemp.target = '_blank';
+            linkTemp.style.display = 'none';
+            document.body.appendChild(linkTemp);
+            linkTemp.click();
+            document.body.removeChild(linkTemp);
+        }
+    } catch (erro) {
+        console.error('Erro ao abrir WhatsApp:', erro);
+        // Fallback: mostrar o link para o usuário copiar
+        alert(`Não foi possível abrir o WhatsApp automaticamente. Copie este link e abra no navegador:\n\n${linkWhatsapp}`);
+    }
 }

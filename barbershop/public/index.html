@@ -144,6 +144,21 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Modal de Confirmação de Cancelamento -->
+            <div id="modal-cancelamento" class="modal-whatsapp">
+                <div class="modal-content">
+                    <span class="modal-close" onclick="fecharModalCancelamento()">&times;</span>
+                    <h3>❌ Confirmar Cancelamento</h3>
+                    <p id="modal-cancelamento-mensagem"></p>
+                    <div class="modal-botoes">
+                        <button class="btn btn-danger" onclick="confirmarCancelamento()">
+                            ✅ Sim, Cancelar Agendamento
+                        </button>
+                        <button class="btn btn-secondary" onclick="fecharModalCancelamento()">❌ Não, Manter Agendamento</button>
+                    </div>
+                </div>
+            </div>
         </main>
 
         <footer>
