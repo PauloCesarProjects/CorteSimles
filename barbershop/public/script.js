@@ -7,10 +7,10 @@ const WHATSAPP_BARBEARIA = '33998034195';
 
 // Dados de serviços - ATUALIZADO 6 de maio de 2025
 const SERVICOS = [
-    { id: 'corte', nome: 'Corte de Cabelo', preco: 'R$ 20,00' },
+    { id: 'corte', nome: 'Corte de Cabelo', preco: 'R$ 25,00' },
     { id: 'sobrancelha', nome: 'Sobrancelha', preco: 'R$ 5,00' },
     { id: 'corte-sobrancelha', nome: 'Corte + Sobrancelha', preco: 'R$ 25,00' },
-    { id: 'corte-pigmentacao', nome: 'Corte + Pigmentação', preco: 'R$ 35,00' }
+    { id: 'corte-pigmentacao', nome: 'Corte + Pigmentação', preco: 'R$ 40,00' }
 ];
 
 // Índices dos carrosseis
